@@ -29,7 +29,7 @@ class Synchronizer( Component ):
 
     @update_ff
     def up_shreg():
-      s.shreg <= concat( s.shreg[0:2], s.sig_in )
+      s.shreg <<= concat( s.shreg[0:2], s.sig_in )
 
     s.sig_synced  //= s.shreg[1]
     s.sig_posedge //= lambda: ~s.shreg[2] & s.shreg[1]

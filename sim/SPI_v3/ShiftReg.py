@@ -24,12 +24,13 @@ class ShiftReg( Component ):
 
     # Logic
 
-    @updata_ff
+    @update_ff
     def up_shreg():
       if ( s.load_en ):
-        s.out <= s.load_data
-      else if ( ~s.load_en & s.shift_en ):
-        s.out <= concat( s.out[0:s.nbits-1], s.in_ )
+        s.out <<= s.load_data
+      elif ( ~s.load_en & s.shift_en ):
+        s.out <<= concat( s.out[0:s.nbits-1], s.in_ )
+
 
   def line_trace( s ):
     return f'{s.in_.bin()}(){s.out.bin()}'
