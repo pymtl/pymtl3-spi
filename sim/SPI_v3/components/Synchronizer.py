@@ -17,11 +17,10 @@ class Synchronizer( Component ):
 
     # Interface
 
-    s.sig_in     = InPort()
-
-    s.sig_synced  = OutPort()
-    s.sig_posedge = OutPort()
-    s.sig_negedge = OutPort()
+    s.in_      = InPort()
+    s.out      = OutPort()
+    s.posedge_ = OutPort()
+    s.negedge_ = OutPort()
 
     # Components
 
@@ -29,11 +28,11 @@ class Synchronizer( Component ):
 
     @update_ff
     def up_shreg():
-      s.shreg <<= concat( s.shreg[0:2], s.sig_in )
+      s.shreg <<= concat( s.shreg[0:2], s.in_ )
 
-    s.sig_synced  //= s.shreg[1]
-    s.sig_posedge //= lambda: ~s.shreg[2] & s.shreg[1]
-    s.sig_negedge //= lambda: s.shreg[2]  & ~s.shreg[1]
+    s.out      //= s.shreg[1]
+    s.posedge_ //= lambda: ~s.shreg[2] & s.shreg[1]
+    s.negedge_ //= lambda: s.shreg[2]  & ~s.shreg[1]
 
   def line_trace( s ):
     return ''

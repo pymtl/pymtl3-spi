@@ -8,7 +8,7 @@ Unit test for SPIMinion.
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
 
-from ..SPIMinion import SPIMinion
+from ..components.SPIMinion import SPIMinion
 
 def test_basic( cmdline_opts ):
 
@@ -19,7 +19,7 @@ def test_basic( cmdline_opts ):
   dut.cs          @= 1
   dut.sclk        @= 0
   dut.mosi        @= 0
-  dut.pull_msg    @= 0
+  dut.pull.msg    @= 0
   dut.sim_reset()
 
   # Helper function
@@ -29,18 +29,18 @@ def test_basic( cmdline_opts ):
     dut.sclk        @= sclk
     dut.cs          @= cs
     dut.mosi        @= mosi
-    dut.pull_msg    @= pull_msg
+    dut.pull.msg    @= pull_msg
 
     dut.sim_eval_combinational()
 
     if push_msg != '?':
-      assert dut.push_msg == push_msg
+      assert dut.push.msg == push_msg
 
     if push != '?':
-      assert dut.push == push
+      assert dut.push.en == push
 
     if pull != '?':
-      assert dut.pull == pull
+      assert dut.pull.en == pull
 
     if miso != '?':
       assert dut.miso == miso
