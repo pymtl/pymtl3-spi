@@ -8,7 +8,7 @@ from pymtl3 import *
 from .Synchronizer import Synchronizer
 from .ShiftReg import ShiftReg
 
-from ..interfaces import PushMasterIfc, PullMasterIfc
+from ..interfaces import PushOutIfc, PullInIfc
 
 class SPIMinion( Component ):
 
@@ -24,8 +24,8 @@ class SPIMinion( Component ):
     s.mosi = InPort ()
     s.miso = OutPort()
 
-    s.push     = PushMasterIfc( s.nbits )
-    s.pull     = PullMasterIfc( s.nbits )
+    s.push = PushOutIfc( s.nbits )
+    s.pull = PullInIfc ( s.nbits )
 
     # Components & Logic
 

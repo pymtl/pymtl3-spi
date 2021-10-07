@@ -14,7 +14,7 @@ from pymtl3 import *
 # PullMasterIfc
 #-------------------------------------------------------------------------
 
-class PullMasterIfc( Interface ):
+class PullInIfc( Interface ):
 
   def construct( s, Type ):
     s.en  = OutPort()
@@ -31,7 +31,7 @@ class PullMasterIfc( Interface ):
 # PullMinionIfc
 #-------------------------------------------------------------------------
 
-class PullMinionIfc( Interface ):
+class PullOutIfc( Interface ):
 
   def construct( s, Type ):
     s.en  = InPort ()

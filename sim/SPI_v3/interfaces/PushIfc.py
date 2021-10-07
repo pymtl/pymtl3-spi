@@ -14,7 +14,7 @@ from pymtl3 import *
 # PushMasterIfc
 #-------------------------------------------------------------------------
 
-class PushMasterIfc( Interface ):
+class PushOutIfc( Interface ):
 
   def construct( s, Type ):
     s.en  = OutPort()
@@ -31,7 +31,7 @@ class PushMasterIfc( Interface ):
 # PushMinionIfc
 #-------------------------------------------------------------------------
 
-class PushMinionIfc( Interface ):
+class PushInIfc( Interface ):
 
   def construct( s, Type ):
     s.en  = InPort()
