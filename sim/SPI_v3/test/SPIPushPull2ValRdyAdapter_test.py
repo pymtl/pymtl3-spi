@@ -16,9 +16,9 @@ def test_basic( cmdline_opts ):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.push_en @= 0
-  dut.pull_en @= 0
-  dut.pull_msg @= 0
+  dut.push.en @= 0
+  dut.pull.en @= 0
+  dut.pull.msg @= 0
   dut.recv_val @= 0
   dut.recv_msg @= 0
   dut.send_rdy @= 0
@@ -58,9 +58,9 @@ def test_queue_len2( cmdline_opts ):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.push_en @= 0
-  dut.pull_en @= 0
-  dut.pull_msg @= 0
+  dut.push.en @= 0
+  dut.pull.en @= 0
+  dut.pull.msg @= 0
   dut.recv_val @= 0
   dut.recv_msg @= 0
   dut.send_rdy @= 0
@@ -94,9 +94,9 @@ def test_queue_len2( cmdline_opts ):
 def t( dut, push_en, push_msg, pull_en, pull_msg, recv_val, recv_rdy, recv_msg, send_val, send_rdy, send_msg ):
 
   # Write input value to input port
-  dut.push_en @= push_en
-  dut.pull_en @= pull_en
-  dut.pull_msg @= pull_msg
+  dut.push.en @= push_en
+  dut.pull.en @= pull_en
+  dut.pull.msg @= pull_msg
   dut.recv_val @= recv_val
   dut.recv_msg @= recv_msg
   dut.send_rdy @= send_rdy
@@ -104,10 +104,10 @@ def t( dut, push_en, push_msg, pull_en, pull_msg, recv_val, recv_rdy, recv_msg, 
   dut.sim_eval_combinational()
 
 
-  print(f"mc_deq_en {dut.mosiqueue.deq.en} mc_enq_en {dut.mosiqueue.enq.en} mc_enq_rdy {dut.mosiqueue.enq.rdy} mc_enq_msg {dut.mosiqueue.enq.msg} cm_enq_en {dut.misoqueue.enq.en} cm_deq_en {dut.misoqueue.deq.en} cm_deq_rdy {dut.misoqueue.deq.rdy} mc_cnt {dut.mosiqueue.count} cm_cnt {dut.misoqueue.count} val_wrt {dut.pull_msg[dut.nbits-2]} pull_en {dut.pull_en} pull_msg {dut.pull_msg} push_en {dut.push_en} val_res {dut.push_msg[dut.nbits-1]} push_msg {dut.push_msg} cm_deq_msg {dut.misoqueue.deq.ret} flw_bit {dut.flow_bit} opn_ents {dut.open_entries}")
+  print(f"mc_deq_en {dut.mosiqueue.deq.en} mc_enq_en {dut.mosiqueue.enq.en} mc_enq_rdy {dut.mosiqueue.enq.rdy} mc_enq_msg {dut.mosiqueue.enq.msg} cm_enq_en {dut.misoqueue.enq.en} cm_deq_en {dut.misoqueue.deq.en} cm_deq_rdy {dut.misoqueue.deq.rdy} mc_cnt {dut.mosiqueue.count} cm_cnt {dut.misoqueue.count} val_wrt {dut.pull.msg[dut.nbits-2]} pull_en {dut.pull.en} pull_msg {dut.pull.msg} push_en {dut.push.en} val_res {dut.push.msg[dut.nbits-1]} push_msg {dut.push.msg} cm_deq_msg {dut.misoqueue.deq.ret} flw_bit {dut.flow_bit} opn_ents {dut.open_entries}")
 
   if push_msg != '?':
-    assert dut.push_msg == push_msg
+    assert dut.push.msg == push_msg
 
   if recv_rdy != '?':
     assert dut.recv_rdy == recv_rdy
