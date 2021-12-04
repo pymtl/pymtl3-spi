@@ -1,2 +1,2 @@
-from .PullIfc import PullMasterIfc, PullMinionIfc
-from .PushIfc import PushMasterIfc, PushMinionIfc
+from .PullIfc import PullOutIfc, PullInIfc
+from .PushIfc import PushOutIfc, PushInIfc
