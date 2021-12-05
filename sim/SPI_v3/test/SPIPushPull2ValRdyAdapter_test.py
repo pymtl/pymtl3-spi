@@ -70,8 +70,8 @@ def test_queue_len2( cmdline_opts ):
   dut.send.rdy @= 0
   dut.sim_reset()
   
-# Test vectors
-#       push_en, push_val, push_spc, push_data, pull_en, pull_val_wrt, pull_val_rd, pull_data, recv_val, recv_rdy, recv_msg, send_val, send_rdy, send_msg 
+  # Test vectors
+  #     push_en, push_val, push_spc, push_data, pull_en, pull_val_wrt, pull_val_rd, pull_data, recv_val, recv_rdy, recv_msg, send_val, send_rdy, send_msg 
   t( dut,  0,        0,        1,       '?',       0,         0,            0,         0x0,         0,        1,      0x0,       0,         0,      '?') #init
   t( dut,  0,        0,        1,       '?',       1,         1,            0,         0x3,         0,        1,      0x0,       0,         0,      '?') #MOSI msg
   t( dut,  0,        0,        1,       '?',       0,         0,            0,         0x0,         0,        1,      0x0,       1,         1,      0x3) #send msg
@@ -94,6 +94,28 @@ def test_queue_len2( cmdline_opts ):
   t( dut,  1,        1,        1,       0x2,       1,         0,            1,         0x0,         0,        0,      0x0,       1,         1,      0x2) #read both queues
   t( dut,  1,        1,        1,       0x3,       1,         0,            1,         0x0,         0,        1,      0x0,       1,         1,      0x3) #read both queues
 
+def test_more_bits( cmdline_opts ):
+
+  dut = SPIPushPull2ValRdyAdapter(6, 1)
+  dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
+  dut.apply( DefaultPassGroup( linetrace=True ) )
+
+  dut.push.en @= 0
+  dut.pull.en @= 0
+  dut.pull.msg.val_rd @= 0
+  dut.pull.msg.val_wrt @= 0
+  dut.pull.msg.data @= 0
+  dut.recv.en @= 0
+  dut.recv.msg @= 0
+  dut.send.rdy @= 0
+  dut.sim_reset()
+  
+# Test vectors
+#       push_en, push_val, push_spc, push_data, pull_en, pull_val_wrt, pull_val_rd, pull_data, recv_val, recv_rdy, recv_msg, send_val, send_rdy, send_msg 
+  t( dut,  0,        0,        1,       '?',       0,         0,            0,         0x0,         0,        1,      0x0,       0,         0,      '?') #init
+  t( dut,  1,        0,        0,       '?',       1,         1,            0,         0xF,         1,        1,      0xE,       0,         0,      '?') #write both queues
+  t( dut,  1,        1,        1,       0xE,       1,         0,            1,         0x0,         0,        0,      0x0,       1,         1,      0xF) #read both queues
+  
 
 # Helper function
 def t( dut, push_en, push_val, push_spc, push_data, pull_en, pull_val_wrt, pull_val_rd, pull_data, recv_val, recv_rdy, recv_msg, send_val, send_rdy, send_msg ):

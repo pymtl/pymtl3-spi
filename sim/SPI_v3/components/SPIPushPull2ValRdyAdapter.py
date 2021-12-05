@@ -39,36 +39,34 @@ class SPIPushPull2ValRdyAdapter( Component ):
     s.recv = RecvIfcRTL(nbits-2)
     s.send = SendIfcRTL(nbits-2)
 
-    s.mc_enq_en = Wire(1)
-    s.cm_deq_en = Wire(1)
+    s.mc_enq_en = Wire(1) 
+    s.cm_deq_en = Wire(1) 
     s.open_entries = Wire(1)
 
-    s.mosiqueue = mc = NormalQueueRTL(nbits-2, num_entries)
-    mc.deq.rdy //= s.send.en
-    mc.deq.ret //= s.send.msg
-    mc.deq.en //= lambda: s.send.en & s.send.rdy
-    mc.enq.en //= s.mc_enq_en
-    mc.enq.msg //= s.pull.msg.data
+    s.mc_q = NormalQueueRTL(nbits-2, num_entries) # mc = master->chip (mosi) 
+    s.mc_q.deq.rdy //= s.send.en
+    s.mc_q.deq.ret //= s.send.msg
+    s.mc_q.deq.en //= lambda: s.send.en & s.send.rdy
+    s.mc_q.enq.en //= s.mc_enq_en
+    s.mc_q.enq.msg //= s.pull.msg.data
 
-    s.misoqueue = cm = NormalQueueRTL(nbits-2, num_entries)
-    cm.enq.en //= lambda: s.recv.en & cm.enq.rdy
-    cm.enq.rdy //= s.recv.rdy
-    cm.enq.msg //= s.recv.msg
-    cm.deq.en //= s.cm_deq_en
-    cm.deq.ret //= s.push.msg.data
+    s.cm_q = NormalQueueRTL(nbits-2, num_entries) # cm = chip->master (miso) 
+    s.cm_q.enq.en //= lambda: s.recv.en & s.cm_q.enq.rdy
+    s.cm_q.enq.rdy //= s.recv.rdy
+    s.cm_q.enq.msg //= s.recv.msg
+    s.cm_q.deq.en //= s.cm_deq_en
+    s.cm_q.deq.ret //= s.push.msg.data
  
     @update
     def comb_block():
-      s.open_entries @= mc.count < num_entries-1
-      s.mc_enq_en @= mc.enq.rdy & s.pull.msg.val_wrt & s.pull.en
-      s.push.msg.spc @= mc.enq.rdy & (~mc.enq.en | s.open_entries)
+      s.open_entries @= s.mc_q.count < num_entries-1
+      s.mc_enq_en @= s.mc_q.enq.rdy & s.pull.msg.val_wrt & s.pull.en
+      s.push.msg.spc @= s.mc_q.enq.rdy & (~s.mc_q.enq.en | s.open_entries)
 
-      s.cm_deq_en @= cm.deq.rdy & s.pull.msg.val_rd & s.push.en & s.pull.en
+      s.cm_deq_en @= s.cm_q.deq.rdy & s.pull.msg.val_rd & s.push.en & s.pull.en
       s.push.msg.val @= s.cm_deq_en
       
       
 
   def line_trace( s ):
-    mc = s.mosiqueue
-    cm = s.misoqueue
-    return f"mc_enq_en {mc.enq.en} mc_enq_rdy {mc.enq.rdy} mc_deq_en {mc.deq.en} cm_enq_en {cm.enq.en} cm_deq_en {cm.deq.en} cm_deq_rdy {cm.deq.rdy} mc_count {mc.count} cm_count {cm.count}"
+    return f"mc_enq_en {s.mc_q.enq.en} mc_enq_rdy {s.mc_q.enq.rdy} mc_deq_en {s.mc_q.deq.en} cm_enq_en {s.cm_q.enq.en} cm_deq_en {s.cm_q.deq.en} cm_deq_rdy {s.cm_q.deq.rdy} mc_count {s.mc_q.count} cm_count {s.cm_q.count}"
