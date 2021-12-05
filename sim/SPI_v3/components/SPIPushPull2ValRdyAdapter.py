@@ -11,6 +11,7 @@ Author : Kyle Infantino
 from pymtl3 import *
 from pymtl3.stdlib.queues.queues import NormalQueueRTL
 from ..interfaces import PushInIfc, PullOutIfc
+from pymtl3.stdlib.ifcs.send_recv_ifcs import RecvIfcRTL, SendIfcRTL
 
 def mk_miso_msg(nbits):
   @bitstruct
@@ -35,44 +36,36 @@ class SPIPushPull2ValRdyAdapter( Component ):
     s.pull = PushInIfc( mk_mosi_msg(nbits) ) #interfaces from perspective of SPIMinion
     s.push = PullOutIfc( mk_miso_msg(nbits) )
 
-    s.recv_val = InPort()
-    s.recv_rdy = OutPort()
-    s.recv_msg = InPort(nbits-2)
-    s.send_val = OutPort()
-    s.send_rdy = InPort()
-    s.send_msg = OutPort(nbits-2)
+    s.recv = RecvIfcRTL(nbits-2)
+    s.send = SendIfcRTL(nbits-2)
+
+    s.mc_enq_en = Wire(1)
+    s.cm_deq_en = Wire(1)
+    s.open_entries = Wire(1)
 
     s.mosiqueue = mc = NormalQueueRTL(nbits-2, num_entries)
-    mc.deq.rdy //= s.send_val
-    mc.deq.ret //= s.send_msg
-    mc.deq.en //= lambda: s.send_val & s.send_rdy
-    s.mc_enq_en = Wire(1)
+    mc.deq.rdy //= s.send.en
+    mc.deq.ret //= s.send.msg
+    mc.deq.en //= lambda: s.send.en & s.send.rdy
     mc.enq.en //= s.mc_enq_en
     mc.enq.msg //= s.pull.msg.data
 
-
     s.misoqueue = cm = NormalQueueRTL(nbits-2, num_entries)
-    cm.enq.en //= lambda: s.recv_val & cm.enq.rdy
-    cm.enq.rdy //= s.recv_rdy
-    cm.enq.msg //= s.recv_msg
-
-    s.cm_deq_en = Wire(1)
+    cm.enq.en //= lambda: s.recv.en & cm.enq.rdy
+    cm.enq.rdy //= s.recv.rdy
+    cm.enq.msg //= s.recv.msg
     cm.deq.en //= s.cm_deq_en
-
-    s.push.msg.data //= cm.deq.ret
-    
-    s.flow_bit = Wire(1)
-    
-    s.open_entries = Wire(1)
-
+    cm.deq.ret //= s.push.msg.data
+ 
     @update
     def comb_block():
       s.open_entries @= mc.count < num_entries-1
       s.mc_enq_en @= mc.enq.rdy & s.pull.msg.val_wrt & s.pull.en
-      s.flow_bit @= mc.enq.rdy & (~mc.enq.en | s.open_entries)
+      s.push.msg.spc @= mc.enq.rdy & (~mc.enq.en | s.open_entries)
+
       s.cm_deq_en @= cm.deq.rdy & s.pull.msg.val_rd & s.push.en & s.pull.en
       s.push.msg.val @= s.cm_deq_en
-      s.push.msg.spc @= s.flow_bit
+      
       
 
   def line_trace( s ):
