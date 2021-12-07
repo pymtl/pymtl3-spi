@@ -9,9 +9,9 @@ Author : Kyle Infantino
 
 '''
 from pymtl3 import *
-from pymtl3.stdlib.queues.queues import NormalQueueRTL
+from pymtl3.stdlib.stream.queues import NormalQueueRTL
 from ..interfaces import PushInIfc, PullOutIfc
-from pymtl3.stdlib.ifcs.send_recv_ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 
 def mk_miso_msg(nbits):
   @bitstruct
@@ -33,40 +33,40 @@ class SPIPushPull2ValRdyAdapter( Component ):
 
   def construct( s, nbits=32, num_entries=2 ):
     s.nbits = nbits
-    s.pull = PushInIfc( mk_mosi_msg(nbits) ) #interfaces from perspective of SPIMinion
-    s.push = PullOutIfc( mk_miso_msg(nbits) )
+    s.push = PushInIfc( mk_mosi_msg(nbits) ) #interfaces from perspective of SPIMinion
+    s.pull = PullOutIfc( mk_miso_msg(nbits) )
 
-    s.recv = RecvIfcRTL(nbits-2)
-    s.send = SendIfcRTL(nbits-2)
+    s.recv = RecvIfcRTL( mk_bits(nbits-2))
+    s.send = SendIfcRTL( mk_bits(nbits-2))
 
-    s.mc_enq_en = Wire(1) 
-    s.cm_deq_en = Wire(1) 
+    s.mc_recv_val = Wire(1) 
+    s.cm_send_rdy = Wire(1) 
     s.open_entries = Wire(1)
 
-    s.mc_q = NormalQueueRTL(nbits-2, num_entries) # mc = master->chip (mosi) 
-    s.mc_q.deq.rdy //= s.send.en
-    s.mc_q.deq.ret //= s.send.msg
-    s.mc_q.deq.en //= lambda: s.send.en & s.send.rdy
-    s.mc_q.enq.en //= s.mc_enq_en
-    s.mc_q.enq.msg //= s.pull.msg.data
+    s.mc_q = NormalQueueRTL( mk_bits(nbits-2), num_entries ) # mc = master->chip (mosi) 
+    s.mc_q.send.val //= s.send.val
+    s.mc_q.send.msg //= s.send.msg
+    s.mc_q.send.rdy //= s.send.rdy
+    s.mc_q.recv.val //= s.mc_recv_val
+    s.mc_q.recv.msg //= s.push.msg.data
 
-    s.cm_q = NormalQueueRTL(nbits-2, num_entries) # cm = chip->master (miso) 
-    s.cm_q.enq.en //= lambda: s.recv.en & s.cm_q.enq.rdy
-    s.cm_q.enq.rdy //= s.recv.rdy
-    s.cm_q.enq.msg //= s.recv.msg
-    s.cm_q.deq.en //= s.cm_deq_en
-    s.cm_q.deq.ret //= s.push.msg.data
+    s.cm_q = NormalQueueRTL( mk_bits(nbits-2), num_entries ) # cm = chip->master (miso) 
+    s.cm_q.recv.val //= s.recv.val
+    s.cm_q.recv.rdy //= s.recv.rdy
+    s.cm_q.recv.msg //= s.recv.msg
+    s.cm_q.send.rdy //= s.cm_send_rdy
+    s.cm_q.send.msg //= s.pull.msg.data
  
     @update
     def comb_block():
-      s.open_entries @= s.mc_q.count < num_entries-1
-      s.mc_enq_en @= s.mc_q.enq.rdy & s.pull.msg.val_wrt & s.pull.en
-      s.push.msg.spc @= s.mc_q.enq.rdy & (~s.mc_q.enq.en | s.open_entries)
+      s.open_entries @= s.mc_q.count < (num_entries-1)
+      s.mc_recv_val @= s.push.msg.val_wrt & s.push.en
+      s.pull.msg.spc @= s.mc_q.recv.rdy & (~s.mc_q.recv.val | s.open_entries) # there is space if the queue outputs recv.rdy and if this cycle there is no valid input to queue or there are more than 1 open entries
 
-      s.cm_deq_en @= s.cm_q.deq.rdy & s.pull.msg.val_rd & s.push.en & s.pull.en
-      s.push.msg.val @= s.cm_deq_en
+      s.cm_send_rdy @= s.push.msg.val_rd & s.pull.en
+      s.pull.msg.val @= s.cm_send_rdy & s.cm_q.send.val
       
       
 
   def line_trace( s ):
-    return f"mc_enq_en {s.mc_q.enq.en} mc_enq_rdy {s.mc_q.enq.rdy} mc_deq_en {s.mc_q.deq.en} cm_enq_en {s.cm_q.enq.en} cm_deq_en {s.cm_q.deq.en} cm_deq_rdy {s.cm_q.deq.rdy} mc_count {s.mc_q.count} cm_count {s.cm_q.count}"
+    return f"mc_recv_rdy {s.mc_q.recv.rdy} mc_recv_val {s.mc_q.recv.val} cm_send_rdy {s.cm_q.send.rdy} cm_send_val {s.cm_q.send.val} mc_count {s.mc_q.count} cm_count {s.cm_q.count}"
