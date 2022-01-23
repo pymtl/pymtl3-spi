@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-SPIMinion.py
+SPIMinionPRTL.py
 ==========================================================================
 '''
 
@@ -10,7 +10,7 @@ from .ShiftReg import ShiftReg
 
 from ..interfaces import PushOutIfc, PullInIfc
 
-class SPIMinion( Component ):
+class SPIMinionPRTL( Component ):
 
   def construct( s, nbits=8 ):
 
@@ -30,13 +30,13 @@ class SPIMinion( Component ):
     # Components & Logic
 
     # TODO: rename Synchronizer
-    s.cs_sync = Synchronizer()
+    s.cs_sync = Synchronizer(1)
     s.cs_sync.in_ //= s.cs
 
-    s.sclk_sync = Synchronizer()
+    s.sclk_sync = Synchronizer(0)
     s.sclk_sync.in_ //= s.sclk
 
-    s.mosi_sync = Synchronizer()
+    s.mosi_sync = Synchronizer(0)
     s.mosi_sync.in_ //= s.mosi
 
     # Add Comments

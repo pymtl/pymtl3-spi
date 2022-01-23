@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-SPIPushPull2ValRdyAdapter.py
+SPIAdapterPRTL.py
 ==========================================================================
 An Adapter that converts push/pull interface from SPI to val/rdy interfaces. 
 
@@ -29,10 +29,11 @@ def mk_mosi_msg(nbits):
     data: mk_bits(nbits-2)
   return MosiMsg
 
-class SPIPushPull2ValRdyAdapter( Component ):
+class SPIAdapterPRTL( Component ):
 
   def construct( s, nbits=32, num_entries=2 ):
     s.nbits = nbits
+    s.nbits_minus2 = nbits-2  # we need this param bc the sign extend function didnt like when we wrote s.nbits-2 as the second arg
     s.push = PushInIfc( mk_mosi_msg(nbits) ) #interfaces from perspective of SPIMinion
     s.pull = PullOutIfc( mk_miso_msg(nbits) )
 
@@ -55,7 +56,6 @@ class SPIPushPull2ValRdyAdapter( Component ):
     s.cm_q.recv.rdy //= s.recv.rdy
     s.cm_q.recv.msg //= s.recv.msg
     s.cm_q.send.rdy //= s.cm_send_rdy
-    s.cm_q.send.msg //= s.pull.msg.data
  
     @update
     def comb_block():
@@ -65,6 +65,7 @@ class SPIPushPull2ValRdyAdapter( Component ):
 
       s.cm_send_rdy @= s.push.msg.val_rd & s.pull.en
       s.pull.msg.val @= s.cm_send_rdy & s.cm_q.send.val
+      s.pull.msg.data @= s.cm_q.send.msg & (sext(s.pull.msg.val, s.nbits_minus2))
       
       
 

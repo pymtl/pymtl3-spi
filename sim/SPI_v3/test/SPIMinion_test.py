@@ -8,11 +8,11 @@ Unit test for SPIMinion.
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
 
-from ..components.SPIMinion import SPIMinion
+from ..components.SPIMinionRTL import SPIMinionRTL
 
 def test_basic( cmdline_opts ):
 
-  dut = SPIMinion(8)
+  dut = SPIMinionRTL(8)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
