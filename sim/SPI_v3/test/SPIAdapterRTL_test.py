@@ -1,18 +1,18 @@
 '''
 ==========================================================================
-SPIPushPull2ValRdyAdapter_test.py
+SPIPAdapterRTL_test.py
 ==========================================================================
-Unit test for SPIPushPull2ValRdyAdapter.
+Unit test for SPIAdapterRTL.
 '''
 
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
 
-from ..components.SPIPushPull2ValRdyAdapter import SPIPushPull2ValRdyAdapter
+from ..components.SPIAdapterRTL import SPIAdapterRTL
 
 def test_basic( cmdline_opts ):
 
-  dut = SPIPushPull2ValRdyAdapter(4, 1)
+  dut = SPIAdapterRTL(4, 1)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
@@ -65,7 +65,7 @@ def test_basic( cmdline_opts ):
                                                                                                                                                                
 def test_queue_len2( cmdline_opts ):
 
-  dut = SPIPushPull2ValRdyAdapter(4, 2)
+  dut = SPIAdapterRTL(4, 2)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
@@ -119,7 +119,7 @@ def test_queue_len2( cmdline_opts ):
 
 def test_more_bits( cmdline_opts ):
 
-  dut = SPIPushPull2ValRdyAdapter(6, 1)
+  dut = SPIAdapterRTL(6, 1)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 

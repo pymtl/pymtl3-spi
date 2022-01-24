@@ -46,7 +46,7 @@ endmodule
 module NormalQueueRTL
 #(
     parameter nbits = 8,
-    parameter num_entries = 1,
+    parameter num_entries = 1
 )
 (
   input  logic                   clk,

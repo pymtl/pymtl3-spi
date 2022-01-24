@@ -8,7 +8,7 @@ N-bit shift register.
 module ShiftReg
 #(
     parameter nbits = 8,
-    parameter reset_value = 0
+    parameter reset_value = 1'b0
 )
 (
   input  logic             clk,

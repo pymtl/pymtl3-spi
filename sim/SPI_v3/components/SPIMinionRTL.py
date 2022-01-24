@@ -6,7 +6,7 @@
 # 'verilog' if you are using Verilog for your RTL design (i.e., your
 # design is in IntMulBaseVRTL).
 
-rtl_language = 'pymtl'
+rtl_language = 'verilog'
 
 #-------------------------------------------------------------------------
 # Do not edit below this line
@@ -17,6 +17,7 @@ rtl_language = 'pymtl'
 from os import path
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
+from ..interfaces import PushOutIfc, PullInIfc
 
 class SPIMinionVRTL( VerilogPlaceholder, Component ):
 
@@ -26,22 +27,25 @@ class SPIMinionVRTL( VerilogPlaceholder, Component ):
 
     s.set_metadata( VerilogTranslationPass.explicit_module_name, f'SPIMinionRTL_{nbits}nbits' )
 
-    s.cs = InPort()
+    s.cs   = InPort ()
+    s.sclk = InPort ()
+    s.mosi = InPort ()
     s.miso = OutPort()
-    s.mosi = InPort()
-    s.sclk = InPort()
-    s.pull_en = OutPort()
-    s.pull__msg = InPort(nbits)
-    s.push__en = OutPort()
-    s.push__msg = OutPort(nbits)
+    s.push = PushOutIfc( nbits )
+    s.pull = PullInIfc ( nbits )
 
-# See if the course staff want to force testing a specific RTL language
-# for their own testing.
+    s.set_metadata( VerilogPlaceholderPass.port_map, {
+      s.cs    : 'cs',
+      s.sclk  : 'sclk',
+      s.mosi  : 'mosi',
+      s.miso  : 'miso',
 
-import sys
-if hasattr( sys, '_called_from_test' ):
-  if sys._pymtl_rtl_override:
-    rtl_language = sys._pymtl_rtl_override
+      s.push.en  : 'push_en',
+      s.push.msg : 'push_msg',
+
+      s.pull.en  : 'pull_en',
+      s.pull.msg : 'pull_msg',
+    })
 
 # Import the appropriate version based on the rtl_language variable
 

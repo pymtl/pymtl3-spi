@@ -1,18 +1,18 @@
 '''
 ==========================================================================
-SPIMinionAdapter_test.py
+SPIMinionAdapterRTL_test.py
 ==========================================================================
-Unit test for SPIMinionAdapter.
+Unit test for SPIMinionAdapterRTL.
 '''
 
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
 
-from ..components.SPIMinionAdapter import SPIMinionAdapter
+from ..components.SPIMinionAdapterRTL import SPIMinionAdapterRTL
 
 def test_basic( cmdline_opts ):
 
-  dut = SPIMinionAdapter(4,1)
+  dut = SPIMinionAdapterRTL(4,1)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 

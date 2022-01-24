@@ -1,8 +1,8 @@
 '''
 ==========================================================================
-SPIMinion_test.py
+SPIMinionRTL_test.py
 ==========================================================================
-Unit test for SPIMinion.
+Unit test for SPIMinionRTL.
 '''
 
 from pymtl3 import *

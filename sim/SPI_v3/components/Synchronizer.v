@@ -10,10 +10,10 @@ Synchronizer.v
 
 module Synchronizer 
 #(
-    parameter reset_value = 0
+    parameter reset_value = 1'b0
 )(
   input  logic clk ,
-  input  logic in,
+  input  logic in_,
   output logic negedge_,
   output logic out,
   output logic posedge_,

@@ -2,10 +2,10 @@
 //SPIMinionVRTL.v
 //==========================================================================
 
-`include "ShiftReg.v"
-`include "Synchronizer.v"
+`include "SPI_v3/components/ShiftReg.v"
+`include "SPI_v3/components/Synchronizer.v"
 
-module SPIMinionVRTL
+module SPI_v3_components_SPIMinionVRTL
 #(
   parameter nbits = 8
 )
@@ -32,7 +32,7 @@ module SPIMinionVRTL
   logic cs_sync_posedge_;
   logic cs_sync_reset;
 
-  Synchronizer #(1) cs_sync
+  Synchronizer #(1'b1) cs_sync
   (
     .clk( cs_sync_clk ),
     .in_( cs_sync_in_ ),
@@ -53,7 +53,7 @@ module SPIMinionVRTL
   logic mosi_sync_posedge_;
   logic mosi_sync_reset;
 
-  Synchronizer #(0) mosi_sync
+  Synchronizer #(1'b0) mosi_sync
   (
     .clk( mosi_sync_clk ),
     .in_( mosi_sync_in_ ),
@@ -74,7 +74,7 @@ module SPIMinionVRTL
   logic sclk_sync_posedge_;
   logic sclk_sync_reset;
 
-  Synchronizer #(0) sclk_sync
+  Synchronizer #(1'b0) sclk_sync
   (
     .clk( sclk_sync_clk ),
     .in_( sclk_sync_in_ ),
@@ -96,7 +96,7 @@ module SPIMinionVRTL
   logic             shreg_in_reset;
   logic             shreg_in_shift_en;
 
-  ShiftReg #(8,0) shreg_in
+  ShiftReg #(8,1'b0) shreg_in
   (
     .clk( shreg_in_clk ),
     .in_( shreg_in_in_ ),
@@ -119,7 +119,7 @@ module SPIMinionVRTL
   logic             shreg_out_reset;
   logic             shreg_out_shift_en;
 
-  ShiftReg #(8,0) shreg_out
+  ShiftReg #(8,1'b0) shreg_out
   (
     .clk( shreg_out_clk ),
     .in_( shreg_out_in_ ),
@@ -154,7 +154,7 @@ module SPIMinionVRTL
   assign shreg_out_in_ = 1'b0;
   assign shreg_out_load_en = pull_en;
   assign shreg_out_load_data = pull_msg;
-  assign miso = shreg_out__out[nbits-1];
+  assign miso = shreg_out_out[nbits-1];
   assign pull_en = cs_sync_negedge_;
   assign push_en = cs_sync_posedge_;
   assign push_msg = shreg_in_out;

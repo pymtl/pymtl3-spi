@@ -1,23 +1,9 @@
 //-------------------------------------------------------------------------
 // SPIAdapterVRTL.v
 //-------------------------------------------------------------------------
-`include "NormalQueue.v"
+`include "SPI_v3/components/NormalQueue.v"
 
-`define MK_MISO_MSG(NUM_BITS)
-typedef struct packed {
-  logic       val;
-  logic       spc;
-  logic [NUM_BITS-1:0] data;
-} MisoMsg;
-
-`define MK_MOSI_MSG(NUM_BITS)
-typedef struct packed {
-  logic       val_wrt;
-  logic       val_rd;
-  logic [NUM_BITS-1:0] data;
-} MosiMsg;
-
-module SPIAdapterVRTL
+module SPI_v3_components_SPIAdapterVRTL
 #(
   parameter nbits = 8,
   parameter num_entries = 1
@@ -26,20 +12,24 @@ module SPIAdapterVRTL
   input  logic                    clk,
   input  logic                    reset,
   input  logic                    pull_en,
-  output logic MK_MISO_MSG(nbits) pull_msg,
+  output logic                    pull_msg_val,
+  output logic                    pull_msg_spc,
+  output logic [nbits-1:0]        pull_msg_data,
   input  logic                    push_en,
-  input  logic MK_MOI_MSG(nbits)  push_msg,
-  input  logic [nbits-1:0]        recv_msg,
+  input  logic                    push_msg_val_wrt,
+  input  logic                    push_msg_val_rd,
+  input  logic [nbits-1:0]        push_msg_data,
+  input  logic [nbits-3:0]        recv_msg,
   output logic                    recv_rdy,
   input  logic                    recv_val,
-  output logic [nbits-1:0]        send_msg,
+  output logic [nbits-3:0]        send_msg,
   input  logic                    send_rdy,
   output logic                    send_val  
 );
 
-  logic [0:0] cm_send_rdy;
-  logic [0:0] mc_recv_val;
-  logic [0:0] open_entries;
+  logic cm_send_rdy;
+  logic mc_recv_val;
+  logic open_entries;
   //-------------------------------------------------------------
   // Component cm_q
   //-------------------------------------------------------------
@@ -104,11 +94,11 @@ module SPIAdapterVRTL
   
   always_comb begin : comb_block
     open_entries = mc_q_count < ( num_entries-1 );
-    mc_recv_val = push_msg.val_wrt & push_en;
-    pull_msg.spc = mc_q_recv_rdy & ( ( ~mc_q_recv_val ) | open_entries );
-    cm_send_rdy = push_msg.val_rd & pull_en;
-    pull_msg.val = cm_send_rdy & cm_q_send_val;
-    pull_msg.data = cm_q_send_msg & { (nbits-2){pull_msg.val} };
+    mc_recv_val = push_msg_val_wrt & push_en;
+    pull_msg_spc = mc_q_recv_rdy & ( ( ~mc_q_recv_val ) | open_entries );
+    cm_send_rdy = push_msg_val_rd & pull_en;
+    pull_msg_val = cm_send_rdy & cm_q_send_val;
+    pull_msg_data = cm_q_send_msg & { (nbits-2){pull_msg_val} };
   end
 
   assign mc_q_clk = clk;
@@ -117,7 +107,7 @@ module SPIAdapterVRTL
   assign send_msg = mc_q_send_msg;
   assign mc_q_send_rdy = send_rdy;
   assign mc_q_recv_val = mc_recv_val;
-  assign mc_q_recv_msg = push_msg.data;
+  assign mc_q_recv_msg = push_msg_data;
   assign cm_q_clk = clk;
   assign cm_q_reset = reset;
   assign cm_q_recv_val = recv_val;
