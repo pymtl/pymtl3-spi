@@ -1,7 +1,7 @@
 //-------------------------------------------------------------------------
 // SPIAdapterVRTL.v
 //-------------------------------------------------------------------------
-`include "SPI_v3/components/NormalQueue.v"
+`include "SPI_v3/vc/queues.v"
 
 module SPI_v3_components_SPIAdapterVRTL
 #(
@@ -27,92 +27,51 @@ module SPI_v3_components_SPIAdapterVRTL
   output logic                    send_val  
 );
 
-  logic cm_send_rdy;
-  logic mc_recv_val;
   logic open_entries;
-  //-------------------------------------------------------------
-  // Component cm_q
-  //-------------------------------------------------------------
 
-  logic             cm_q_clk;
-  logic             cm_q_count;
-  logic             cm_q_reset;
-  logic [nbits-3:0] cm_q_recv_msg;
-  logic             cm_q_recv_rdy;
-  logic             cm_q_recv_val;
-  logic [nbits-3:0] cm_q_send_msg;
-  logic             cm_q_send_rdy;
-  logic             cm_q_send_val;
+  logic [nbits-3:0]             cm_q_send_msg;
+  logic                         cm_q_send_rdy;
+  logic                         cm_q_send_val;
 
-  NormalQueueRTL #(nbits, num_entries) cm_q
+  vc_Queue #(4'b0, nbits, num_entries) cm_q
   (
-    .clk( cm_q_clk ),
-    .count( cm_q_count ),
-    .reset( cm_q_reset ),
-    .recv_msg( cm_q_recv_msg ),
-    .recv_rdy( cm_q_recv_rdy ),
-    .recv_val( cm_q_recv_val ),
+    .clk( clk ),
+    .num_free_entries( ),
+    .reset( reset ),
+    .recv_msg( recv_msg ),
+    .recv_rdy( recv_rdy ),
+    .recv_val( recv_val ),
     .send_msg( cm_q_send_msg ),
     .send_rdy( cm_q_send_rdy ),
     .send_val( cm_q_send_val )
   );
 
-  //-------------------------------------------------------------
-  // End of component cm_q
-  //-------------------------------------------------------------
+  logic [$clog2(num_entries):0] mc_q_num_free;
+  logic                         mc_q_recv_rdy;
+  logic                         mc_q_recv_val;
 
-  //-------------------------------------------------------------
-  // Component mc_q
-  //-------------------------------------------------------------
-
-  logic             mc_q_clk;
-  logic             mc_q_count;
-  logic             mc_q_reset;
-  logic [nbits-1:0] mc_q_recv_msg;
-  logic             mc_q_recv_rdy;
-  logic             mc_q_recv_val;
-  logic [nbits-1:0] mc_q_send_msg;
-  logic             mc_q_send_rdy;
-  logic             mc_q_send_val;
-
-  NormalQueueRTL #(nbits, num_entries) mc_q
+  vc_Queue #(4'b0, nbits, num_entries) mc_q
   (
-    .clk( mc_q_clk ),
-    .count( mc_q_count ),
-    .reset( mc_q_reset ),
-    .recv_msg( mc_q_recv_msg ),
+    .clk( clk ),
+    .num_free_entries( mc_q_num_free ),
+    .reset( reset ),
+    .recv_msg( push_msg_data ),
     .recv_rdy( mc_q_recv_rdy ),
     .recv_val( mc_q_recv_val ),
-    .send_msg( mc_q_send_msg ),
-    .send_rdy( mc_q_send_rdy ),
-    .send_val( mc_q_send_val )
+    .send_msg( send_msg ),
+    .send_rdy( send_rdy ),
+    .send_val( send_val )
   );
-
-  //-------------------------------------------------------------
-  // End of component mc_q
-  //-------------------------------------------------------------
   
   always_comb begin : comb_block
-    open_entries = mc_q_count < ( num_entries-1 );
-    mc_recv_val = push_msg_val_wrt & push_en;
+    open_entries = mc_q_num_free > 1;
+    mc_q_recv_val = push_msg_val_wrt & push_en;
     pull_msg_spc = mc_q_recv_rdy & ( ( ~mc_q_recv_val ) | open_entries );
-    cm_send_rdy = push_msg_val_rd & pull_en;
-    pull_msg_val = cm_send_rdy & cm_q_send_val;
+    cm_q_send_rdy = push_msg_val_rd & pull_en;
+    pull_msg_val = cm_q_send_rdy & cm_q_send_val;
     pull_msg_data = cm_q_send_msg & { (nbits-2){pull_msg_val} };
+    $display("pull_en %b pull_msg_spc %b open_entries %b, mc_q_num_free %d mc_q_recv_rdy %d mc_q_recv_val %d", pull_en, pull_msg_spc, open_entries, mc_q_num_free, mc_q_recv_rdy, mc_q_recv_val);
+    // $display("mc full %s, empty %s", mc_q.ctrl.empty, mc_q.ctrl.full);
   end
-
-  assign mc_q_clk = clk;
-  assign mc_q_reset = reset;
-  assign send_val = mc_q_send_val;
-  assign send_msg = mc_q_send_msg;
-  assign mc_q_send_rdy = send_rdy;
-  assign mc_q_recv_val = mc_recv_val;
-  assign mc_q_recv_msg = push_msg_data;
-  assign cm_q_clk = clk;
-  assign cm_q_reset = reset;
-  assign cm_q_recv_val = recv_val;
-  assign recv_rdy = cm_q_recv_rdy;
-  assign cm_q_recv_msg = recv_msg;
-  assign cm_q_send_rdy = cm_send_rdy;
 
 endmodule

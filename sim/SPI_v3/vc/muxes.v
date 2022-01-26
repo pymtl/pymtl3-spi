@@ -18,7 +18,7 @@ module vc_Mux2
   output logic [p_nbits-1:0] out
 );
 
-  always_comb
+  always @(*)
   begin
     case ( sel )
       1'd0 : out = in0;
@@ -42,7 +42,7 @@ module vc_Mux3
   output logic [p_nbits-1:0] out
 );
 
-  always_comb
+  always @(*)
   begin
     case ( sel )
       2'd0 : out = in0;
@@ -67,7 +67,7 @@ module vc_Mux4
   output logic [p_nbits-1:0] out
 );
 
-  always_comb
+  always @(*)
   begin
     case ( sel )
       2'd0 : out = in0;
@@ -93,7 +93,7 @@ module vc_Mux5
   output logic [p_nbits-1:0] out
 );
 
-  always_comb
+  always @(*)
   begin
     case ( sel )
       3'd0 : out = in0;
@@ -120,7 +120,7 @@ module vc_Mux6
   output logic [p_nbits-1:0] out
 );
 
-  always_comb
+  always @(*)
   begin
     case ( sel )
       3'd0 : out = in0;
@@ -148,7 +148,7 @@ module vc_Mux7
   output logic [p_nbits-1:0] out
 );
 
-  always_comb
+  always @(*)
   begin
     case ( sel )
       3'd0 : out = in0;
@@ -177,7 +177,7 @@ module vc_Mux8
   output logic [p_nbits-1:0] out
 );
 
-  always_comb
+  always @(*)
   begin
     case ( sel )
       3'd0 : out = in0;
