@@ -70,8 +70,6 @@ module SPI_v3_components_SPIAdapterVRTL
     cm_q_send_rdy = push_msg_val_rd & pull_en;
     pull_msg_val = cm_q_send_rdy & cm_q_send_val;
     pull_msg_data = cm_q_send_msg & { (nbits-2){pull_msg_val} };
-    $display("pull_en %b pull_msg_spc %b open_entries %b, mc_q_num_free %d mc_q_recv_rdy %d mc_q_recv_val %d", pull_en, pull_msg_spc, open_entries, mc_q_num_free, mc_q_recv_rdy, mc_q_recv_val);
-    // $display("mc full %s, empty %s", mc_q.ctrl.empty, mc_q.ctrl.full);
   end
 
 endmodule
