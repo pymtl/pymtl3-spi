@@ -34,15 +34,15 @@ module SPI_v3_components_SPIAdapterVRTL
   // Component cm_q
   //-------------------------------------------------------------
 
-  logic [0:0] cm_q_clk;
-  logic [0:0] cm_q_count;
-  logic [0:0] cm_q_reset;
-  logic [1:0] cm_q_recv_msg;
-  logic [0:0] cm_q_recv_rdy;
-  logic [0:0] cm_q_recv_val;
-  logic [1:0] cm_q_send_msg;
-  logic [0:0] cm_q_send_rdy;
-  logic [0:0] cm_q_send_val;
+  logic             cm_q_clk;
+  logic             cm_q_count;
+  logic             cm_q_reset;
+  logic [nbits-3:0] cm_q_recv_msg;
+  logic             cm_q_recv_rdy;
+  logic             cm_q_recv_val;
+  logic [nbits-3:0] cm_q_send_msg;
+  logic             cm_q_send_rdy;
+  logic             cm_q_send_val;
 
   NormalQueueRTL #(nbits, num_entries) cm_q
   (

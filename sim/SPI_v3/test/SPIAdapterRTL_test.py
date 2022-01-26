@@ -117,6 +117,61 @@ def test_queue_len2( cmdline_opts ):
   t( dut,  0,        0,        1,       0x0,       1,         0,            1,         0x0,         0,        1,      0x0,       1,         0,      '?') #read both queues push
   t( dut,  1,        1,        1,       0x3,       0,         0,            1,         0x0,         0,        1,      0x0,       1,         1,      0x3) #read both queues pull
 
+def test_queue_len5( cmdline_opts ):
+
+  dut = SPIAdapterRTL(4, 5)
+  dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
+  dut.apply( DefaultPassGroup( linetrace=True ) )
+
+  dut.pull.en @= 0
+  dut.push.en @= 0
+  dut.push.msg.val_rd @= 0
+  dut.push.msg.val_wrt @= 0
+  dut.push.msg.data @= 0
+  dut.recv.val @= 0
+  dut.recv.msg @= 0
+  dut.send.rdy @= 0
+  dut.sim_reset()
+  
+  # Test vectors
+  #     pull_en, pull_val, pull_spc, pull_data, push_en, push_val_wrt, push_val_rd, push_data, recv_val, recv_rdy, recv_msg, send_val, send_rdy, send_msg 
+  t( dut,  0,        0,        1,       0x0,       0,         0,            0,         0x0,         0,        1,      0x0,       0,         0,      '?') #init
+  t( dut,  0,        0,        1,       0x0,       1,         1,            0,         0x3,         0,        1,      0x0,       0,         0,      '?') #MOSI msg push
+  t( dut,  1,        0,        1,       0x0,       0,         1,            0,         0x3,         0,        1,      0x0,       1,         0,      '?') #MOSI msg pull
+  t( dut,  0,        0,        1,       0x0,       0,         1,            0,         0x0,         0,        1,      0x0,       1,         1,      0x3) #send msg
+  
+  t( dut,  0,        0,        1,       0x0,       0,         1,            0,         0x0,         1,        1,      0x3,       0,         1,      '?') #recv msg
+  t( dut,  0,        0,        1,       0x0,       1,         0,            1,         0x0,         0,        1,      0x0,       0,         1,      '?') #accept MISO msg push
+  t( dut,  1,        1,        1,       0x3,       0,         0,            1,         0x0,         0,        1,      0x0,       0,         1,      '?') #accept MISO msg pull
+  
+  t( dut,  0,        0,        1,       0x0,       1,         1,            0,         0x2,         1,        1,      0x1,       0,         1,      '?') #write both queues push
+  t( dut,  1,        0,        1,       0x0,       0,         1,            0,         0x2,         0,        1,      0x1,       1,         0,      '?') #write both queues pull
+  t( dut,  0,        0,        1,       0x0,       1,         0,            1,         0x0,         0,        1,      0x0,       1,         1,      0x2) #read both queues push
+  t( dut,  1,        1,        1,       0x1,       0,         0,            1,         0x0,         0,        1,      0x0,       0,         1,      '?') #read both queues pull
+  
+  t( dut,  0,        0,        1,       0x0,       1,         1,            0,         0x1,         0,        1,      0x2,       0,         0,      '?') #write mosi push
+  t( dut,  1,        0,        1,       0x0,       0,         1,            0,         0x1,         1,        1,      0x2,       1,         0,      '?') #write miso pull
+  t( dut,  0,        0,        1,       0x0,       1,         1,            0,         0x2,         1,        1,      0x1,       1,         0,      '?') #write both queues push
+  t( dut,  1,        0,        1,       0x0,       0,         1,            0,         0x2,         0,        1,      0x1,       1,         0,      '?') #write both queues pull
+  t( dut,  0,        0,        1,       0x0,       1,         0,            1,         0x0,         0,        1,      0x0,       1,         1,      0x1) #read both queues push
+  t( dut,  1,        1,        1,       0x2,       0,         0,            1,         0x0,         0,        1,      0x0,       1,         1,      0x2) #read both queues pull
+  t( dut,  0,        0,        1,       0x0,       1,         0,            1,         0x0,         0,        1,      0x0,       0,         1,      '?') #read miso queues push
+  t( dut,  1,        1,        1,       0x1,       0,         0,            1,         0x0,         0,        1,      0x0,       0,         1,      '?') #read miso queues pull
+
+  t( dut,  0,        0,        1,       0x0,       1,         1,            0,         0x1,         1,        1,      0x1,       0,         0,      '?') #write both queues push
+  t( dut,  1,        0,        1,       0x0,       0,         1,            0,         0x1,         1,        1,      0x2,       1,         0,      '?') #write both queues pull
+  t( dut,  0,        0,        1,       0x0,       1,         1,            0,         0x2,         1,        1,      0x3,       1,         0,      '?') #write both queues push
+  t( dut,  1,        0,        1,       0x0,       0,         1,            0,         0x2,         1,        1,      0x0,       1,         0,      '?') #write both queues pull
+  t( dut,  0,        0,        1,       0x0,       1,         0,            1,         0x0,         0,        1,      0x0,       1,         1,      0x1) #read both queues push
+  t( dut,  1,        1,        1,       0x1,       0,         0,            1,         0x0,         0,        1,      0x0,       1,         0,      '?') #read both queues pull
+  t( dut,  0,        0,        1,       0x0,       1,         1,            0,         0x3,         0,        1,      0x3,       1,         0,      '?') #write both queues push
+  t( dut,  1,        0,        1,       0x0,       1,         1,            0,         0x3,         1,        1,      0x3,       1,         0,      '?') #write both queues pull
+  t( dut,  0,        0,        1,       0x0,       1,         0,            1,         0x0,         0,        1,      0x0,       1,         1,      0x2) #read both queues push
+  t( dut,  1,        1,        1,       0x2,       0,         0,            1,         0x0,         0,        1,      0x0,       1,         0,      '?') #read both queues pull
+  t( dut,  0,        0,        1,       0x0,       1,         0,            1,         0x0,         0,        1,      0x0,       1,         0,      '?') #read both queues push
+  t( dut,  1,        1,        1,       0x3,       0,         0,            1,         0x0,         0,        1,      0x0,       1,         1,      0x3) #read both queues pull
+
+
 def test_more_bits( cmdline_opts ):
 
   dut = SPIAdapterRTL(6, 1)

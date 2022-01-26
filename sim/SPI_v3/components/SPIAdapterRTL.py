@@ -6,7 +6,7 @@
 # 'verilog' if you are using Verilog for your RTL design (i.e., your
 # design is in IntMulBaseVRTL).
 
-rtl_language = 'verilog'
+rtl_language = 'pymtl'
 
 #-------------------------------------------------------------------------
 # Do not edit below this line
@@ -45,21 +45,30 @@ class SPIAdapterVRTL( VerilogPlaceholder, Component ):
 
     s.set_metadata( VerilogTranslationPass.explicit_module_name, f'SPIAdapterRTL__{nbits}nbits__{num_entries}num_entries' )
 
-    s.push = PushInIfc( mk_mosi_msg(nbits) ) #interfaces from perspective of SPIMinion
-    s.pull = PullOutIfc( mk_miso_msg(nbits) )
+    # s.push = PushInIfc( mk_mosi_msg(nbits) ) #interfaces from perspective of SPIMinion
+    # s.pull = PullOutIfc( mk_miso_msg(nbits) )
 
     s.recv = RecvIfcRTL( mk_bits(nbits-2))
     s.send = SendIfcRTL( mk_bits(nbits-2))
 
+    s.pull_en = InPort(1)
+    s.pull_msg_val   = OutPort(1)
+    s.pull_msg_spc   = OutPort(1) 
+    s.pull_msg_data  = OutPort(nbits-2)
+    s.push_en = InPort(1)
+    s.push_msg_val_wrt  = InPort(1)
+    s.push_msg_val_rd   = InPort(1)
+    s.push_msg_data     = InPort(nbits-2) 
+
     s.set_metadata( VerilogPlaceholderPass.port_map, {
-        s.pull.en          : 'pull_en',
-        s.pull.msg.val     : 'pull_msg_val',
-        s.pull.msg.spc     : 'pull_msg_spc',
-        s.pull.msg.data    : 'pull_msg_data',
-        s.push.en          : 'push_en',
-        s.push.msg.val_wrt : 'push_msg_val_wrt',
-        s.push.msg.val_rd  : 'push_msg_val_rd',
-        s.push.msg.data    : 'push_msg_data',
+        s.pull_en          : 'pull_en',
+        s.pull_msg_val     : 'pull_msg_val',
+        s.pull_msg_spc     : 'pull_msg_spc',
+        s.pull_msg_data    : 'pull_msg_data',
+        s.push_en          : 'push_en',
+        s.push_msg_val_wrt : 'push_msg_val_wrt',
+        s.push_msg_val_rd  : 'push_msg_val_rd',
+        s.push_msg_data    : 'push_msg_data',
         s.recv.msg         : 'recv_msg',
         s.recv.rdy         : 'recv_rdy',
         s.recv.val         : 'recv_val',
@@ -68,12 +77,34 @@ class SPIAdapterVRTL( VerilogPlaceholder, Component ):
         s.send.val         : 'send_val'  
     })
 
+class SPIAdapterOuterVRTL( Component ):
+
+  def construct( s, nbits=8, num_entries=1 ):
+    s.push = PushInIfc( mk_mosi_msg(nbits) ) #interfaces from perspective of SPIMinion
+    s.pull = PullOutIfc( mk_miso_msg(nbits) )
+
+    s.recv = RecvIfcRTL( mk_bits(nbits-2))
+    s.send = SendIfcRTL( mk_bits(nbits-2))
+
+    s.adapter = a = SPIAdapterVRTL(nbits, num_entries)
+
+    s.recv //= a.recv
+    s.send //= a.send
+    s.push.en //= a.push_en
+    s.push.msg.val_wrt //= a.push_msg_val_wrt
+    s.push.msg.val_rd //= a.push_msg_val_rd
+    s.pull.en //= a.pull_en
+    s.pull.msg.val //= a.pull_msg_val
+    s.pull.msg.spc //= a.pull_msg_spc 
+    s.pull.msg.data //= a.pull_msg_data
+
+
 
 # Import the appropriate version based on the rtl_language variable
 
 if rtl_language == 'pymtl':
   from .SPIAdapterPRTL import SPIAdapterPRTL as SPIAdapterRTL
 elif rtl_language == 'verilog':
-  SPIAdapterRTL = SPIAdapterVRTL
+  SPIAdapterRTL = SPIAdapterOuterVRTL
 else:
   raise Exception("Invalid RTL language!")
