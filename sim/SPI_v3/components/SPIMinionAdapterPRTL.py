@@ -2,49 +2,72 @@
 ==========================================================================
 SPIMinionAdapterPRTL.py
 ==========================================================================
-A composition module combining the SPIMinion and SPIPPushPull2ValRdyAdapter 
+An Adapter that converts push/pull interface from SPI to val/rdy interfaces. 
 
 Author : Kyle Infantino
-  Date : Dec 7, 2021
+  Date : Nov 30, 2021
 
 '''
-
 from pymtl3 import *
-from .SPIMinionPRTL import SPIMinionPRTL
-from .SPIAdapterPRTL import SPIAdapterPRTL
+from pymtl3.stdlib.stream.queues import NormalQueueRTL
+from ..interfaces import PushInIfc, PullOutIfc
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
+
+def mk_miso_msg(nbits):
+  @bitstruct
+  class MisoMsg:
+    val: Bits1
+    spc: Bits1
+    data: mk_bits(nbits-2)
+  return MisoMsg
+
+def mk_mosi_msg(nbits):
+  @bitstruct
+  class MosiMsg:
+    val_wrt: Bits1
+    val_rd: Bits1
+    data: mk_bits(nbits-2)
+  return MosiMsg
 
 class SPIMinionAdapterPRTL( Component ):
 
-    def construct( s, nbits=34, num_entries=1 ):
-        s.nbits = nbits
+  def construct( s, nbits=32, num_entries=2 ):
+    s.nbits = nbits
+    s.nbits_minus2 = nbits-2  # we need this param bc the sign extend function didnt like when we wrote s.nbits-2 as the second arg
+    s.push = PushInIfc( mk_mosi_msg(nbits) ) #interfaces from perspective of SPIMinion
+    s.pull = PullOutIfc( mk_miso_msg(nbits) )
 
-        s.cs   = InPort ()
-        s.sclk = InPort ()
-        s.mosi = InPort ()
-        s.miso = OutPort()
+    s.recv = RecvIfcRTL( mk_bits(nbits-2))
+    s.send = SendIfcRTL( mk_bits(nbits-2))
 
-        s.recv = RecvIfcRTL( mk_bits(nbits-2))
-        s.send = SendIfcRTL( mk_bits(nbits-2))
+    s.mc_recv_val = Wire(1) 
+    s.cm_send_rdy = Wire(1) 
+    s.open_entries = Wire(1)
 
-        s.minion = m = SPIMinionPRTL(nbits)
-        m.cs //= s.cs
-        m.sclk //= s.sclk
-        m.mosi //= s.mosi
-        m.miso //= s.miso
+    s.mc_q = NormalQueueRTL( mk_bits(nbits-2), num_entries ) # mc = master->chip (mosi) 
+    s.mc_q.send.val //= s.send.val
+    s.mc_q.send.msg //= s.send.msg
+    s.mc_q.send.rdy //= s.send.rdy
+    s.mc_q.recv.val //= s.mc_recv_val
+    s.mc_q.recv.msg //= s.push.msg.data
 
-        s.adapter = a = SPIAdapterPRTL(nbits,num_entries)
-        a.pull.en //= m.pull.en
-        a.pull.msg.val //= m.pull.msg[nbits-1]
-        a.pull.msg.spc //= m.pull.msg[nbits-2]
-        a.pull.msg.data //= m.pull.msg[0:nbits-2]
-        a.push.en //= m.push.en
-        a.push.msg.val_wrt //= m.push.msg[nbits-1]
-        a.push.msg.val_rd //= m.push.msg[nbits-2]
-        a.push.msg.data //= m.push.msg[0:nbits-2]
+    s.cm_q = NormalQueueRTL( mk_bits(nbits-2), num_entries ) # cm = chip->master (miso) 
+    s.cm_q.recv.val //= s.recv.val
+    s.cm_q.recv.rdy //= s.recv.rdy
+    s.cm_q.recv.msg //= s.recv.msg
+    s.cm_q.send.rdy //= s.cm_send_rdy
+ 
+    @update
+    def comb_block():
+      s.open_entries @= s.mc_q.count < (num_entries-1)
+      s.mc_recv_val @= s.push.msg.val_wrt & s.push.en
+      s.pull.msg.spc @= s.mc_q.recv.rdy & (~s.mc_q.recv.val | s.open_entries) # there is space if the queue outputs recv.rdy and if this cycle there is no valid input to queue or there are more than 1 open entries
 
-        a.send //= s.send
-        a.recv //= s.recv
-    
-    def line_trace( s ):
-        return f"push_en {s.adapter.push.en} push_msg {s.adapter.push.msg.val_wrt} {s.adapter.push.msg.val_rd} {s.adapter.push.msg.data} pull_en {s.adapter.pull.en} pull_msg {s.adapter.pull.msg.val} {s.adapter.pull.msg.spc} {s.adapter.pull.msg.data}"
+      s.cm_send_rdy @= s.push.msg.val_rd & s.pull.en
+      s.pull.msg.val @= s.cm_send_rdy & s.cm_q.send.val
+      s.pull.msg.data @= s.cm_q.send.msg & (sext(s.pull.msg.val, s.nbits_minus2))
+      
+      
+
+  def line_trace( s ):
+    return f"mc_recv_rdy {s.mc_q.recv.rdy} mc_recv_val {s.mc_q.recv.val} cm_send_rdy {s.cm_q.send.rdy} cm_send_val {s.cm_q.send.val} mc_count {s.mc_q.count} cm_count {s.cm_q.count}"

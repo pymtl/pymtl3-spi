@@ -9,7 +9,7 @@ from pymtl3 import *
 # from .ShiftReg import ShiftReg
 
 from ..interfaces import PushInIfc, PullOutIfc
-from math import log2
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 
 class SPIMaster( Component ):
 
@@ -18,7 +18,7 @@ class SPIMaster( Component ):
     # Local parameters
     s.nbits = nbits
     s.minions = minions
-    s.cs_in_num = log2(s.minions)
+    s.cs_in_num = clog2(s.minions)
 
     # Interface
     # TODO: SPI interface
