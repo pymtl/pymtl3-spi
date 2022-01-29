@@ -17,47 +17,44 @@ rtl_language = 'pymtl'
 from os import path
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
-from ..interfaces import PushOutIfc, PullInIfc
+from ..interfaces import PushInIfc, PullOutIfc
 
-class SPIMinionVRTL( VerilogPlaceholder, Component ):
+class SPIMasterVRTL( VerilogPlaceholder, Component ):
 
   # Constructor
 
-  def construct( s, nbits=8 ):
+  def construct( s, nbits=34 ):
 
-    s.set_metadata( VerilogTranslationPass.explicit_module_name, f'SPIMinionRTL_{nbits}nbits' )
+    s.set_metadata( VerilogTranslationPass.explicit_module_name, f'SPIMasterRTL_{nbits}nbits' )
 
-    s.cs   = InPort ()
-    s.sclk = InPort ()
-    s.mosi = InPort ()
-    s.miso = OutPort()
-    s.push = PushOutIfc( nbits )
-    s.pull = PullInIfc ( nbits )
+    # s.cs   = InPort ()
+    # s.sclk = InPort ()
+    # s.mosi = InPort ()
+    # s.miso = OutPort()
+    
+    # s.recv = RecvIfcRTL( mk_bits(nbits-2))
+    # s.send = SendIfcRTL( mk_bits(nbits-2))
 
-    s.set_metadata( VerilogPlaceholderPass.port_map, {
-      s.cs    : 'cs',
-      s.sclk  : 'sclk',
-      s.mosi  : 'mosi',
-      s.miso  : 'miso',
+    # s.set_metadata( VerilogPlaceholderPass.port_map, {
+    #   s.cs    : 'cs',
+    #   s.sclk  : 'sclk',
+    #   s.mosi  : 'mosi',
+    #   s.miso  : 'miso',
 
-      s.push.en  : 'push_en',
-      s.push.msg : 'push_msg',
+    #   s.recv.val  : 'recv_val',
+    #   s.recv.rdy  : 'recv_rdy',
+    #   s.recv.msg  : 'recv_msg',
 
-      s.pull.en  : 'pull_en',
-      s.pull.msg : 'pull_msg',
-    })
-
-# For to force testing a specific RTL language
-import sys
-if hasattr( sys, '_called_from_test' ):
-  if sys._pymtl_rtl_override:
-    rtl_language = sys._pymtl_rtl_override
+    #   s.send.val  : 'send_val',
+    #   s.send.rdy  : 'send_rdy',
+    #   s.send.msg  : 'send_msg',
+    # })
 
 # Import the appropriate version based on the rtl_language variable
 
 if rtl_language == 'pymtl':
-  from .SPIMinionPRTL import SPIMinionPRTL as SPIMinionRTL
+  from .SPIMasterPRTL import SPIMasterPRTL as SPIMasterRTL
 elif rtl_language == 'verilog':
-  SPIMinionRTL = SPIMinionVRTL
+  SPIMasterRTL = SPIMasterVRTL
 else:
   raise Exception("Invalid RTL language!")

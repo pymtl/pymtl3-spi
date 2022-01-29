@@ -96,6 +96,11 @@ class SPIMinionAdapterOuterVRTL( Component ):
     s.pull.msg.spc //= a.pull_msg_spc 
     s.pull.msg.data //= a.pull_msg_data
 
+# For to force testing a specific RTL language
+import sys
+if hasattr( sys, '_called_from_test' ):
+  if sys._pymtl_rtl_override:
+    rtl_language = sys._pymtl_rtl_override
 
 # Import the appropriate version based on the rtl_language variable
 
