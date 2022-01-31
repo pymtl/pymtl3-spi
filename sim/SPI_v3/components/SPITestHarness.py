@@ -1,8 +1,11 @@
 '''
 ==========================================================================
-TapeOutTestHarness.py
+SPITestHarness.py
 ==========================================================================
-Test harness for sending messages over SPI.
+Test harness for sending messages over SPI. For use with SPIMinionAdapterComposite module
+
+Author : Kyle Infantino and Dilan Lakhani
+  Date : Jan 30, 2022
 '''
 
 from pymtl3 import *
@@ -15,13 +18,13 @@ import copy
 # TestHarness
 #=========================================================================
 
-class TapeOutTestHarness( object ):
+class SPITestHarness( object ):
 
   #-----------------------------------------------------------------------
   # constructor
   #-----------------------------------------------------------------------
  
-  def __init__( s, DESIGN, component_bits, cmdline_opts ):
+  def __init__( s, DESIGN, num_components, spi_bits, cmdline_opts ):
  
     s.dut = DESIGN
     s.dut = config_model_with_cmdline_opts( s.dut, cmdline_opts, [] )
@@ -34,20 +37,32 @@ class TapeOutTestHarness( object ):
 
     s.dut.sim_reset() # Reset the simulator
 
-    s.spi_bits = s.dut.spi_bits
-    s.component_bits = component_bits
-    s.spi_msg_bits = s.spi_bits - s.component_bits - 2
+    s.spi_bits = spi_bits
+    s.component_bits = 0 if num_components < 2 else clog2(num_components)
+    s.spi_msg_bits = s.spi_bits - s.component_bits - 2 # 2 valid bits that we do not want to account for when splitting message
 
 
-  def t_mult_msg(component_num, req_len, resp_len, request_list, expected_resp_list ):#send messages
-    comp_bits = mk_bits(component_num)
+  def t_mult_msg(s, req_len, resp_len, request_list, expected_resp_list, component_addr=0 ):#send messages
+    """
+    req/resp_len: number of bits of req/resp message
+    request_list: array of messages to send to DUT
+    expected_resp_list: array of expected message to receive from DUT
+    components_addr: index of component messages ar ebeing sent to
+    """
+
+    req_BitsN = mk_bits(req_len)
+    resp_BitsN = mk_bits(resp_len)
+
+    if s.component_bits > 0:
+      comp_addr = mk_bits(s.component_bits)(component_addr)
 
     #create req messages
     all_reqs = []
     for req in request_list:
       req_msgs = [] 
       i = 0
-      while i < req_len//s.spi_msg_bits: # 2 valid bits that we do not want to account for when splitting message
+      req = req_BitsN(req)
+      while i < req_len//s.spi_msg_bits: 
         req_msgs.append(req[i*s.spi_msg_bits: (i+1)*s.spi_msg_bits])
         i += 1
 
@@ -59,7 +74,8 @@ class TapeOutTestHarness( object ):
 
     all_expected_resps = []
     for resp in expected_resp_list:
-      exp_resp = zext(exp_resp, s.spi_msg_bits*(ceil(resp_len/s.spi_msg_bits))) # zext to get correct length for exp_resp
+      # zext to get correct length for the expected message (actual result will be a multiple of spi_msg_bits)
+      exp_resp = zext(resp_BitsN(resp), s.spi_msg_bits*(ceil(resp_len/s.spi_msg_bits))) 
       all_expected_resps.append(exp_resp)
 
     #send req / read resp
@@ -67,7 +83,7 @@ class TapeOutTestHarness( object ):
     resp_msgs = []
 
     def _assemble_msg():
-      # assemble response
+      # assemble full response from spi packets
       if len(resp_msgs) == 1:
         act_resp = resp_msgs[0]
       else:
@@ -77,54 +93,73 @@ class TapeOutTestHarness( object ):
           act_resp = concat(act_resp, resp_msgs[i])
           i+=1
       resp_msgs.clear()
-      actual_responses.append(act_resp) # append response to single request to overall responses list
+      actual_responses.append(act_resp) # append assembled response to list of all responses
 
     def _process_resp(resp):
       if resp[s.spi_bits-1]==1:
-        resp_msgs.append(resp[0:s.spi_msg_bits])
-        if len(resp_msgs) == ceil(resp_len/s.spi_msg_bits):
-          _assemble_msg()
+        resp_msgs.append(resp[0:s.spi_msg_bits]) #save message if response val bit set
+        if len(resp_msgs) == ceil(resp_len/s.spi_msg_bits): 
+          _assemble_msg() #assemble message if enough spi response packets to make response message
 
-    resp_spi = _t_spi(concat(Bits1(0), Bits1(1), comp_bits, zext(Bits1(0),s.spi_msg_bits)))
+    #send spi message to get status bits from MinionAdapter
+    if s.component_bits > 0:
+      resp_spi = s._t_spi(concat(Bits1(0), Bits1(1), comp_addr, zext(Bits1(0),s.spi_msg_bits)))
+    else:
+      resp_spi = s._t_spi(concat(Bits1(0), Bits1(1), zext(Bits1(0),s.spi_msg_bits)))
+
     _process_resp(resp_spi)
     while(resp_spi[s.spi_bits-2] == 0 ):#poll until space available. We wait for the space bit (the second most significant bit) to be 1
-      resp_spi = t_spi(concat(Bits1(0), Bits1(1), comp_bits, zext(Bits1(0),s.spi_msg_bits)))
+      if s.component_bits > 0:
+        resp_spi = s._t_spi(concat(Bits1(0), Bits1(1), comp_addr, zext(Bits1(0),s.spi_msg_bits)))
+      else:
+        resp_spi = s._t_spi(concat(Bits1(0), Bits1(1), zext(Bits1(0),s.spi_msg_bits)))
       _process_resp(resp_spi)
 
+    #space is now available in MinionAdapter queue for more messages
     for req in all_reqs:
       for msg in req: #sending reqs
-        resp_spi = _t_spi(concat(Bits1(1),Bits1(1),comp_bits,msg))
+        if s.component_bits > 0:
+          resp_spi = s._t_spi(concat(Bits1(1),Bits1(1),comp_addr,msg))
+        else:
+          resp_spi = s._t_spi(concat(Bits1(1),Bits1(1),msg))
         _process_resp(resp_spi)
 
-        while(resp_spi[s.spi_bits-2] == 0 ): #poll until space available. We wait for the space bit (the second most significant bit) to be 1
-          resp_spi = _t_spi(concat(Bits1(0), Bits1(1), comp_bits, zext(Bits1(0), s.spi_msg_bits)))
+        while(resp_spi[s.spi_bits-2] == 0 ): #wait until space is available again
+          if s.component_bits > 0:
+            resp_spi = s._t_spi(concat(Bits1(0), Bits1(1), comp_addr, zext(Bits1(0), s.spi_msg_bits)))
+          else:
+            resp_spi = s._t_spi(concat(Bits1(0), Bits1(1), zext(Bits1(0), s.spi_msg_bits)))
           _process_resp(resp_spi)
 
-
-    while len(actual_responses) < len(all_expected_resps): # get responses to each request
-      resp_spi = _t_spi( concat(Bits1(0), Bits1(1), comp_bits, zext(Bits1(0),s.spi_msg_bits)))
+    # get responses to each request
+    while len(actual_responses) < len(all_expected_resps): #wait until all exepected responses received 
+      if s.component_bits > 0:
+        resp_spi = s._t_spi( concat(Bits1(0), Bits1(1), comp_addr, zext(Bits1(0),s.spi_msg_bits)))
+      else:
+        resp_spi = s._t_spi( concat(Bits1(0), Bits1(1), zext(Bits1(0),s.spi_msg_bits)))
       _process_resp(resp_spi)
 
 
-
+    # all responses received - check results
     for i in range(len(all_expected_resps)):
       assert all_expected_resps[i] == actual_responses[i]
 
-  def _t_spi( pkt ): #send spi packets
-    start_transaction()
+  #helper functions
+  def _t_spi( s, pkt ): #send spi packets
+    s._start_transaction()
     resp_spi = Bits1(0)
-    for i in range(dut.spi_bits):
-      resp_bit = _send_bit( pkt[dut.spi_bits - i - 1] )
+    for i in range(s.spi_bits):
+      resp_bit = s._send_bit( pkt[s.spi_bits - i - 1] ) #send most significant bits first
       if i == 0:
         resp_spi = resp_bit
       else:
         resp_spi = concat( resp_spi, resp_bit )
-    _end_transaction()
+    s._end_transaction()
     return copy.deepcopy(resp_spi)
 
-  def _start_transaction( ): #send bits
-    # Starts a transaction by keeping cs HIGH for 4 cycles then pulling cs LOW 
-    for i in range(4): # cs = 1
+  def _start_transaction( s ): #send bits
+    # Starts a transaction by keeping cs HIGH for 3 cycles then pulling cs LOW 
+    for i in range(3): # cs = 1
       # Write input values to input ports
       s.dut.sclk        @= 0
       s.dut.cs          @= 1
@@ -139,16 +174,16 @@ class TapeOutTestHarness( object ):
       s.dut.sim_eval_combinational()
       s.dut.sim_tick()
 
-  def _end_transaction( ):
+  def _end_transaction( s ):
     s.dut.sclk        @= 0
     s.dut.cs          @= 1
     s.dut.mosi        @= 1 # mosi is a dont care here bc CS is high
     s.dut.sim_eval_combinational()
     s.dut.sim_tick()
 
-  def _send_bit(mosi): #send bits
+  def _send_bit( s, mosi): #send bits
     # This function sends bits over SPI once the transaction has been started (CS is already low)
-    for i in range(4): # sclk = 0
+    for i in range(3): # sclk = 0
       # Write input values to input ports
       s.dut.sclk        @= 0
       s.dut.cs          @= 0
@@ -157,7 +192,7 @@ class TapeOutTestHarness( object ):
       # Tick simulator one cycle
       s.dut.sim_tick()
 
-    for i in range(4): # sclk = 1
+    for i in range(3): # sclk = 1
       s.dut.sclk        @= 1
       s.dut.cs          @= 0
       s.dut.mosi        @= mosi
@@ -165,4 +200,4 @@ class TapeOutTestHarness( object ):
       s.dut.sim_tick()
 
     # only return MISO after 8th cycle so it has time to reflect correct value
-    return copy.deepcopy(dut.miso) 
+    return copy.deepcopy(s.dut.miso) 
