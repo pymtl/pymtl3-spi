@@ -4,6 +4,9 @@ SclkCounter.py
 ==========================================================================
 N-bit counter for use with an external clock. 
 Reguires external clock edges as input.
+
+Author : Kyle Infantino
+  Date : Jan 29, 2022
 '''
 
 from pymtl3 import *

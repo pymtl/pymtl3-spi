@@ -25,6 +25,11 @@ class SPITestHarness( object ):
   #-----------------------------------------------------------------------
  
   def __init__( s, DESIGN, num_components, spi_bits, cmdline_opts ):
+    """
+    DESIGN: instantiation of RTL design
+    num_components: number of components that can be addressed
+    spi_bits: number of bits in an spi packet
+    """
  
     s.dut = DESIGN
     s.dut = config_model_with_cmdline_opts( s.dut, cmdline_opts, [] )
@@ -47,7 +52,7 @@ class SPITestHarness( object ):
     req/resp_len: number of bits of req/resp message
     request_list: array of messages to send to DUT
     expected_resp_list: array of expected message to receive from DUT
-    components_addr: index of component messages ar ebeing sent to
+    components_addr: index of component messages are being sent to
     """
 
     req_BitsN = mk_bits(req_len)

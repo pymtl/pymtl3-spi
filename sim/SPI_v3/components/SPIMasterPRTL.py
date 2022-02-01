@@ -2,6 +2,11 @@
 ==========================================================================
 SPIMasterPRTL.py
 ==========================================================================
+SPIMaster module for sending messages over SPI
+
+Author : Kyle Infantino
+  Date : Jan 29, 2022
+
 '''
 
 from pymtl3 import *
