@@ -135,28 +135,28 @@ module SPI_v3_components_SPIMinionVRTL
     shreg_out_shift_en = ( ~cs_sync_out ) & sclk_sync_negedge_;
   end
 
-  assign cs_sync_clk = clk;
-  assign cs_sync_reset = reset;
-  assign cs_sync_in_ = cs;
-  assign sclk_sync_clk = clk;
-  assign sclk_sync_reset = reset;
-  assign sclk_sync_in_ = sclk;
-  assign mosi_sync_clk = clk;
-  assign mosi_sync_reset = reset;
-  assign mosi_sync_in_ = mosi;
-  assign shreg_in_clk = clk;
-  assign shreg_in_reset = reset;
-  assign shreg_in_in_ = mosi_sync_out;
-  assign shreg_in_load_en = 1'b0;
-  assign shreg_in_load_data = {nbits{1'b0}};
-  assign shreg_out_clk = clk;
-  assign shreg_out_reset = reset;
-  assign shreg_out_in_ = 1'b0;
-  assign shreg_out_load_en = pull_en;
+  assign cs_sync_clk         = clk;
+  assign cs_sync_reset       = reset;
+  assign cs_sync_in_         = cs;
+  assign sclk_sync_clk       = clk;
+  assign sclk_sync_reset     = reset;
+  assign sclk_sync_in_       = sclk;
+  assign mosi_sync_clk       = clk;
+  assign mosi_sync_reset     = reset;
+  assign mosi_sync_in_       = mosi;
+  assign shreg_in_clk        = clk;
+  assign shreg_in_reset      = reset;
+  assign shreg_in_in_        = mosi_sync_out;
+  assign shreg_in_load_en    = 1'b0;
+  assign shreg_in_load_data  = {nbits{1'b0}};
+  assign shreg_out_clk       = clk;
+  assign shreg_out_reset     = reset;
+  assign shreg_out_in_       = 1'b0;
+  assign shreg_out_load_en   = pull_en;
   assign shreg_out_load_data = pull_msg;
-  assign miso = shreg_out_out[nbits-1];
-  assign pull_en = cs_sync_negedge_;
-  assign push_en = cs_sync_posedge_;
-  assign push_msg = shreg_in_out;
+  assign miso                = shreg_out_out[nbits-1];
+  assign pull_en             = cs_sync_negedge_;
+  assign push_en             = cs_sync_posedge_;
+  assign push_msg            = shreg_in_out;
 
 endmodule
