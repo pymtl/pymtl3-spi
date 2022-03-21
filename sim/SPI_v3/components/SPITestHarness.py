@@ -24,12 +24,12 @@ class SPITestHarness( object ):
   # constructor
   #-----------------------------------------------------------------------
  
+  #-----------------------------------------------------------------------
+  # DESIGN: instantiation of RTL design
+  # num_components: number of components that can be addressed
+  # spi_bits: number of bits in an spi packet
+  #-----------------------------------------------------------------------
   def __init__( s, DESIGN, num_components, spi_bits, cmdline_opts ):
-    """
-    DESIGN: instantiation of RTL design
-    num_components: number of components that can be addressed
-    spi_bits: number of bits in an spi packet
-    """
  
     s.dut = DESIGN
     s.dut = config_model_with_cmdline_opts( s.dut, cmdline_opts, [] )
@@ -46,14 +46,14 @@ class SPITestHarness( object ):
     s.component_bits = 0 if num_components < 2 else clog2(num_components)
     s.spi_msg_bits = s.spi_bits - s.component_bits - 2 # 2 valid bits that we do not want to account for when splitting message
 
-
-  def t_mult_msg(s, req_len, resp_len, request_list, expected_resp_list, component_addr=0 ):#send messages
-    """
-    req/resp_len: number of bits of req/resp message
-    request_list: array of messages to send to DUT
-    expected_resp_list: array of expected message to receive from DUT
-    components_addr: index of component messages are being sent to
-    """
+  #-----------------------------------------------------------------------
+  # Function to send messages over SPI
+  # req/resp_len: number of bits of req/resp message
+  # request_list: array of messages to send to DUT
+  # expected_resp_list: array of expected message to receive from DUT
+  # components_addr: index of component messages are being sent to
+  #-----------------------------------------------------------------------
+  def t_mult_msg(s, req_len, resp_len, request_list, expected_resp_list, component_addr=0 ):
 
     req_BitsN = mk_bits(req_len)
     resp_BitsN = mk_bits(resp_len)
