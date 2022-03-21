@@ -7,8 +7,7 @@ N-bit shift register.
 
 module ShiftReg
 #(
-    parameter nbits = 8,
-    parameter reset_value = 1'b0
+    parameter nbits = 8
 )
 (
   input  logic             clk,
@@ -23,7 +22,7 @@ module ShiftReg
   always_ff @(posedge clk) 
   begin 
     if ( reset ) begin
-      out <= { nbits{reset_value}};
+      out <= { nbits{1'b0}};
     end
     else if ( load_en ) begin
       out <= load_data;

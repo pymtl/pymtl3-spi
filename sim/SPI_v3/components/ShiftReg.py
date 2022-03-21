@@ -9,11 +9,10 @@ from pymtl3 import *
 
 class ShiftReg( Component ):
 
-  def construct( s, nbits, reset_value=0 ):
+  def construct( s, nbits ):
 
     # Local Parameters
     s.nbits = nbits
-    s.reset_value = reset_value
 
     # Interface
 
@@ -27,7 +26,8 @@ class ShiftReg( Component ):
 
     @update_ff
     def up_shreg():
-      if s.reset: s.out <<= s.reset_value # for 4 state sim
+      if s.reset: 
+        s.out <<= zext(0, s.nbits) # for 4 state sim
       elif ( s.load_en ):
         s.out <<= s.load_data
       elif ( ~s.load_en & s.shift_en ):

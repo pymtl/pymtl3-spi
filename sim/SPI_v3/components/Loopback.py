@@ -11,7 +11,7 @@ Author: Dilan Lakhani
 '''
 
 from pymtl3 import *
-from pymtl3.stdlib.basic_rtl import RegisterFile, Mux, RegEnRst, RegEn, Adder, Incrementer, LeftLogicalShifter
+from pymtl3.stdlib.basic_rtl import RegEnRst
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 
 

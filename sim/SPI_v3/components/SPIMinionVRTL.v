@@ -96,7 +96,7 @@ module SPI_v3_components_SPIMinionVRTL
   logic             shreg_in_reset;
   logic             shreg_in_shift_en;
 
-  ShiftReg #(8,1'b0) shreg_in
+  ShiftReg #( 8 ) shreg_in
   (
     .clk( shreg_in_clk ),
     .in_( shreg_in_in_ ),
@@ -119,7 +119,7 @@ module SPI_v3_components_SPIMinionVRTL
   logic             shreg_out_reset;
   logic             shreg_out_shift_en;
 
-  ShiftReg #(8,1'b0) shreg_out
+  ShiftReg #( 8 ) shreg_out
   (
     .clk( shreg_out_clk ),
     .in_( shreg_out_in_ ),
