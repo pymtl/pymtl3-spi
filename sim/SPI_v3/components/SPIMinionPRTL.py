@@ -2,6 +2,9 @@
 ==========================================================================
 SPIMinionPRTL.py
 ==========================================================================
+SPIMinion module. Supports SPI mode 3
+
+Author : Yanghui Ou
 '''
 
 from pymtl3 import *

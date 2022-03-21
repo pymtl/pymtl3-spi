@@ -1,6 +1,7 @@
 //==========================================================================
 //SPIMinionVRTL.v
 //==========================================================================
+// SPIMinion module. Supports SPI mode 3
 
 `include "SPI_v3/components/ShiftReg.v"
 `include "SPI_v3/components/Synchronizer.v"

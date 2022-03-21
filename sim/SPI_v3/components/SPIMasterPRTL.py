@@ -2,7 +2,8 @@
 ==========================================================================
 SPIMasterPRTL.py
 ==========================================================================
-SPIMaster module for sending messages over SPI
+SPIMaster module for sending messages over SPI.
+Supports SPI mode 3
 
 Author : Kyle Infantino
   Date : Jan 29, 2022

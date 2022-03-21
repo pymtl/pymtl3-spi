@@ -33,7 +33,7 @@ class SclkCounter( Component ):
 
     @update_ff
     def up_count():
-      if s.reset | (s.count==max_count): 
+      if s.reset | ((s.count==max_count) & s.sclk_posedge): 
         s.count <<= s.reset_value
         s.start_reg <<= 0
       else: 
