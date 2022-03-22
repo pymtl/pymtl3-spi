@@ -18,7 +18,11 @@ class SPILoopbackComposite( Component ):
 
   def construct( s, nbits=32 ):
 
-    s.nbits = nbits
+    #Local parameters
+
+    s.nbits = nbits  # size of SPI packet including 2 bit flow control
+
+    #Interface
 
     s.cs   = InPort ()
     s.sclk = InPort ()
@@ -36,4 +40,4 @@ class SPILoopbackComposite( Component ):
     m.send //= s.composite.recv
 
   def line_trace( s ):
-    return ' '
+    return f'loopback recv_msg {s.loopback.recv.msg} loopback send_msg {s.loopback.send.msg}'

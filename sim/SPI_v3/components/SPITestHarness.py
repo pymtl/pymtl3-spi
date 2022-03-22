@@ -27,13 +27,16 @@ class SPITestHarness( object ):
   #-----------------------------------------------------------------------
   # DESIGN: instantiation of RTL design
   # num_components: number of components that can be addressed
-  # spi_bits: number of bits in an spi packet
+  # spi_bits: number of bits in an spi packet. Each packet consists of 2 
+  #           flow control bits, (optional) component address bits, and the data
   #-----------------------------------------------------------------------
-  def __init__( s, DESIGN, num_components, spi_bits, cmdline_opts ):
+  def __init__( s, DESIGN, num_components, spi_bits, cmdline_opts, trace=True ):
  
     s.dut = DESIGN
     s.dut = config_model_with_cmdline_opts( s.dut, cmdline_opts, [] )
-    s.dut.apply(DefaultPassGroup())
+    # s.dut.apply(DefaultPassGroup(linetrace=True)) #commented out for chip-sim
+    from pymtl3.passes.mamba import Mamba2020
+    s.dut.apply( Mamba2020( print_line_trace=trace ) )
 
     s.dut.cs @= 1
     s.dut.sclk @= 0
@@ -47,16 +50,21 @@ class SPITestHarness( object ):
     s.spi_msg_bits = s.spi_bits - s.component_bits - 2 # 2 valid bits that we do not want to account for when splitting message
 
   #-----------------------------------------------------------------------
-  # Function to send messages over SPI
   # req/resp_len: number of bits of req/resp message
   # request_list: array of messages to send to DUT
-  # expected_resp_list: array of expected message to receive from DUT
+  # expected_resp_list: array of expected message to receive from DUT. If print_msgs is True, list can be filled with don't cares
   # components_addr: index of component messages are being sent to
+  # return_msgs: False indicates actual responses will be compared to the expected responses. 
+  #             True indicates the actual responses will be returned instead. Returns format [actual response addresses], [actual response messages]
+  #             The length of expected_resp_list must be equal to the number of messages to be printed
   #-----------------------------------------------------------------------
-  def t_mult_msg(s, req_len, resp_len, request_list, expected_resp_list, component_addr=0 ):
+  def t_mult_msg(s, req_len, request_list, resp_len, expected_resp_list, component_addr=0, return_msgs=False ):#send messages
 
-    req_BitsN = mk_bits(req_len)
-    resp_BitsN = mk_bits(resp_len)
+    if req_len > 0:
+      req_BitsN = mk_bits(req_len)
+    
+    if resp_len > 0:
+      resp_BitsN = mk_bits(resp_len)
 
     if s.component_bits > 0:
       comp_addr = mk_bits(s.component_bits)(component_addr)
@@ -85,9 +93,10 @@ class SPITestHarness( object ):
 
     #send req / read resp
     actual_responses = []
+    actual_resp_addr = []
     resp_msgs = []
 
-    def _assemble_msg():
+    def _assemble_msg( addr ):
       # assemble full response from spi packets
       if len(resp_msgs) == 1:
         act_resp = resp_msgs[0]
@@ -97,28 +106,31 @@ class SPITestHarness( object ):
         while i < len(resp_msgs):
           act_resp = concat(act_resp, resp_msgs[i])
           i+=1
-      resp_msgs.clear()
+      resp_msgs.clear() #clear received SPI packets
+      actual_resp_addr.append(addr) #append components address to array
       actual_responses.append(act_resp) # append assembled response to list of all responses
 
     def _process_resp(resp):
-      if resp[s.spi_bits-1]==1:
+      if resp[s.spi_bits-1]==1: #check if valid response
         resp_msgs.append(resp[0:s.spi_msg_bits]) #save message if response val bit set
-        if len(resp_msgs) == ceil(resp_len/s.spi_msg_bits): 
-          _assemble_msg() #assemble message if enough spi response packets to make response message
+        if len(resp_msgs) == ceil(resp_len/s.spi_msg_bits): #check if number of packets received is enough to assemble a whole response message
+          if s.component_bits > 0: #check if any component bits
+            resp_addr = resp[ s.spi_msg_bits:s.spi_msg_bits + s.component_bits ]  #get component address
+          else: #no component bits
+            resp_addr = 0 #set response address equal to 0
+          _assemble_msg( resp_addr ) #assemble message if enough spi response packets to make response message
 
-    #send spi message to get status bits from MinionAdapter
+    #send spi message to get status bits from MinionAdapter TODO: remove condition
     if s.component_bits > 0:
-      resp_spi = s._t_spi(concat(Bits1(0), Bits1(1), comp_addr, zext(Bits1(0),s.spi_msg_bits)))
+      resp_spi = s._t_spi(concat(Bits1(0), Bits1(0), comp_addr, zext(Bits1(0),s.spi_msg_bits)))
     else:
-      resp_spi = s._t_spi(concat(Bits1(0), Bits1(1), zext(Bits1(0),s.spi_msg_bits)))
+      resp_spi = s._t_spi(concat(Bits1(0), Bits1(0), zext(Bits1(0),s.spi_msg_bits)))
 
-    _process_resp(resp_spi)
     while(resp_spi[s.spi_bits-2] == 0 ):#poll until space available. We wait for the space bit (the second most significant bit) to be 1
       if s.component_bits > 0:
-        resp_spi = s._t_spi(concat(Bits1(0), Bits1(1), comp_addr, zext(Bits1(0),s.spi_msg_bits)))
+        resp_spi = s._t_spi(concat(Bits1(0), Bits1(0), comp_addr, zext(Bits1(0),s.spi_msg_bits)))
       else:
-        resp_spi = s._t_spi(concat(Bits1(0), Bits1(1), zext(Bits1(0),s.spi_msg_bits)))
-      _process_resp(resp_spi)
+        resp_spi = s._t_spi(concat(Bits1(0), Bits1(0), zext(Bits1(0),s.spi_msg_bits)))
 
     #space is now available in MinionAdapter queue for more messages
     for req in all_reqs:
@@ -146,7 +158,10 @@ class SPITestHarness( object ):
 
 
     # all responses received - check results
+    if return_msgs:
+      return actual_resp_addr, actual_responses
     for i in range(len(all_expected_resps)):
+      print("Component Addr: " + str(actual_resp_addr[i]) + " Actual: " + str(actual_responses[i]) + " | Expected: " + str(all_expected_resps[i]))
       assert all_expected_resps[i] == actual_responses[i]
 
   #helper functions
