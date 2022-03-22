@@ -16,9 +16,9 @@ def test_basic( cmdline_opts ):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.cs          @= 1
-  dut.sclk        @= 0
-  dut.mosi        @= 0
+  dut.spi_min.cs          @= 1
+  dut.spi_min.sclk        @= 0
+  dut.spi_min.mosi        @= 0
   dut.recv.val    @= 0
   dut.recv.msg    @= 0
   dut.send.rdy    @= 0
@@ -128,16 +128,16 @@ def test_basic( cmdline_opts ):
 def t( dut, cs, sclk, mosi, miso, recv_val, recv_rdy, recv_msg, send_val, send_rdy, send_msg ):
 
   # Write input value to input port
-  dut.sclk        @= sclk
-  dut.cs          @= cs
-  dut.mosi        @= mosi
+  dut.spi_min.sclk        @= sclk
+  dut.spi_min.cs          @= cs
+  dut.spi_min.mosi        @= mosi
   dut.recv.val    @= recv_val
   dut.recv.msg    @= recv_msg
   dut.send.rdy    @= send_rdy
 
   dut.sim_eval_combinational()
 
-  assert dut.miso == miso
+  assert dut.spi_min.miso == miso
 
   if recv_rdy != '?':
       assert dut.recv.rdy == recv_rdy

@@ -13,25 +13,20 @@ from pymtl3 import *
 from .SPIMinionPRTL import SPIMinionPRTL
 from .SPIMinionAdapterPRTL import SPIMinionAdapterPRTL
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
+from ..interfaces.SPIIfc import SPIMinionIfc
 
 class SPIMinionAdapterCompositePRTL( Component ):
 
   def construct( s, nbits=34, num_entries=1 ):
     s.nbits = nbits
 
-    s.cs   = InPort ()
-    s.sclk = InPort ()
-    s.mosi = InPort ()
-    s.miso = OutPort()
+    s.spi_min = SPIMinionIfc()
 
     s.recv = RecvIfcRTL( mk_bits(nbits-2))
     s.send = SendIfcRTL( mk_bits(nbits-2))
 
     s.minion = m = SPIMinionPRTL(nbits)
-    m.cs //= s.cs
-    m.sclk //= s.sclk
-    m.mosi //= s.mosi
-    m.miso //= s.miso
+    m.spi_min //= s.spi_min
 
     s.adapter = a = SPIMinionAdapterPRTL(nbits,num_entries)
     a.pull.en //= m.pull.en

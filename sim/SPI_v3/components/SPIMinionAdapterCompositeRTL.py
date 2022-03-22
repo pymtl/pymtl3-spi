@@ -18,6 +18,7 @@ from os import path
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
+from ..interfaces.SPIIfc import SPIMinionIfc
 
 class SPIMinionAdapterCompositeVRTL( VerilogPlaceholder, Component ):
 
@@ -27,19 +28,16 @@ class SPIMinionAdapterCompositeVRTL( VerilogPlaceholder, Component ):
 
     s.set_metadata( VerilogTranslationPass.explicit_module_name, f'SPIMinionAdapterCompositeRTL_{nbits}nbits_{num_entries}entries' )
 
-    s.cs   = InPort ()
-    s.sclk = InPort ()
-    s.mosi = InPort ()
-    s.miso = OutPort()
+    s.spi_min = SPIMinionIfc()
     
     s.recv = RecvIfcRTL( mk_bits(nbits-2))
     s.send = SendIfcRTL( mk_bits(nbits-2))
 
     s.set_metadata( VerilogPlaceholderPass.port_map, {
-      s.cs    : 'cs',
-      s.sclk  : 'sclk',
-      s.mosi  : 'mosi',
-      s.miso  : 'miso',
+      s.spi_min.cs    : 'cs',
+      s.spi_min.sclk  : 'sclk',
+      s.spi_min.mosi  : 'mosi',
+      s.spi_min.miso  : 'miso',
 
       s.recv.val  : 'recv_val',
       s.recv.rdy  : 'recv_rdy',
