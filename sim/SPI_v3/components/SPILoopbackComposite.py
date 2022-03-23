@@ -26,7 +26,6 @@ class SPILoopbackComposite( Component ):
     #Interface
 
     s.spi_min = SPIMinionIfc()
-    s.miso = OutPort()
 
     s.composite = m = SPIMinionAdapterCompositePRTL(s.nbits, 1)
     m.spi_min   //= s.spi_min
