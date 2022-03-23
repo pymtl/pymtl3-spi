@@ -13,6 +13,7 @@ Author : Kyle Infantino
 from pymtl3 import *
 from .SPIMinionAdapterCompositePRTL import SPIMinionAdapterCompositePRTL
 from .Loopback import Loopback
+from ..interfaces.SPIIfc import SPIMinionIfc
 
 class SPILoopbackComposite( Component ):
 
@@ -24,16 +25,11 @@ class SPILoopbackComposite( Component ):
 
     #Interface
 
-    s.cs   = InPort ()
-    s.sclk = InPort ()
-    s.mosi = InPort ()
+    s.spi_min = SPIMinionIfc()
     s.miso = OutPort()
 
     s.composite = m = SPIMinionAdapterCompositePRTL(s.nbits, 1)
-    m.cs //= s.cs
-    m.sclk //= s.sclk
-    m.mosi //= s.mosi
-    m.miso //= s.miso
+    m.spi_min   //= s.spi_min
 
     s.loopback = m = Loopback(s.nbits-2)
     m.recv //= s.composite.send

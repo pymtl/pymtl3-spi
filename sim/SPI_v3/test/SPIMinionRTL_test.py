@@ -16,9 +16,9 @@ def test_basic( cmdline_opts ):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.cs          @= 1
-  dut.sclk        @= 0
-  dut.mosi        @= 0
+  dut.spi_min.cs          @= 1
+  dut.spi_min.sclk        @= 0
+  dut.spi_min.mosi        @= 0
   dut.pull.msg    @= 0
   dut.sim_reset()
 
@@ -26,9 +26,9 @@ def test_basic( cmdline_opts ):
   def t( pull, push, cs, sclk, mosi, miso, pull_msg, push_msg ):
 
     # Write input value to input port
-    dut.sclk        @= sclk
-    dut.cs          @= cs
-    dut.mosi        @= mosi
+    dut.spi_min.sclk        @= sclk
+    dut.spi_min.cs          @= cs
+    dut.spi_min.mosi        @= mosi
     dut.pull.msg    @= pull_msg
 
     dut.sim_eval_combinational()
@@ -43,7 +43,7 @@ def test_basic( cmdline_opts ):
       assert dut.pull.en == pull
 
     if miso != '?':
-      assert dut.miso == miso
+      assert dut.spi_min.miso == miso
 
     # Tick simulator one cycle
     dut.sim_tick()

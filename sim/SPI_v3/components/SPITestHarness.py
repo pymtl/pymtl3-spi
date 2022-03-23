@@ -38,10 +38,10 @@ class SPITestHarness( object ):
     from pymtl3.passes.mamba import Mamba2020
     s.dut.apply( Mamba2020( print_line_trace=trace ) )
 
-    s.dut.cs @= 1
-    s.dut.sclk @= 0
-    s.dut.mosi @= 0
-    s.dut.miso @= 0
+    s.dut.spi_min.cs @= 1
+    s.dut.spi_min.sclk @= 0
+    s.dut.spi_min.mosi @= 0
+    s.dut.spi_min.miso @= 0
 
     s.dut.sim_reset() # Reset the simulator
 
@@ -181,23 +181,23 @@ class SPITestHarness( object ):
     # Starts a transaction by keeping cs HIGH for 3 cycles then pulling cs LOW 
     for i in range(3): # cs = 1
       # Write input values to input ports
-      s.dut.sclk        @= 0
-      s.dut.cs          @= 1
-      s.dut.mosi        @= 1 # mosi is a dont care here bc CS is high
+      s.dut.spi_min.sclk        @= 0
+      s.dut.spi_min.cs          @= 1
+      s.dut.spi_min.mosi        @= 1 # mosi is a dont care here bc CS is high
       s.dut.sim_eval_combinational()
       # Tick simulator one cycle
       s.dut.sim_tick()
     for i in range(3): # cs = 0, three cycles because the synchronizer takes 2 cycles for negedge to appear
-      s.dut.sclk        @= 0
-      s.dut.cs          @= 0
-      s.dut.mosi        @= 1 # mosi is a dont care here bc CS is high
+      s.dut.spi_min.sclk        @= 0
+      s.dut.spi_min.cs          @= 0
+      s.dut.spi_min.mosi        @= 1 # mosi is a dont care here bc CS is high
       s.dut.sim_eval_combinational()
       s.dut.sim_tick()
 
   def _end_transaction( s ):
-    s.dut.sclk        @= 0
-    s.dut.cs          @= 1
-    s.dut.mosi        @= 1 # mosi is a dont care here bc CS is high
+    s.dut.spi_min.sclk        @= 0
+    s.dut.spi_min.cs          @= 1
+    s.dut.spi_min.mosi        @= 1 # mosi is a dont care here bc CS is high
     s.dut.sim_eval_combinational()
     s.dut.sim_tick()
 
@@ -205,19 +205,19 @@ class SPITestHarness( object ):
     # This function sends bits over SPI once the transaction has been started (CS is already low)
     for i in range(3): # sclk = 0
       # Write input values to input ports
-      s.dut.sclk        @= 0
-      s.dut.cs          @= 0
-      s.dut.mosi        @= mosi
+      s.dut.spi_min.sclk        @= 0
+      s.dut.spi_min.cs          @= 0
+      s.dut.spi_min.mosi        @= mosi
       s.dut.sim_eval_combinational()
       # Tick simulator one cycle
       s.dut.sim_tick()
 
     for i in range(3): # sclk = 1
-      s.dut.sclk        @= 1
-      s.dut.cs          @= 0
-      s.dut.mosi        @= mosi
+      s.dut.spi_min.sclk        @= 1
+      s.dut.spi_min.cs          @= 0
+      s.dut.spi_min.mosi        @= mosi
       s.dut.sim_eval_combinational()
       s.dut.sim_tick()
 
     # only return MISO after 8th cycle so it has time to reflect correct value
-    return copy.deepcopy(s.dut.miso) 
+    return copy.deepcopy(s.dut.spi_min.miso) 
