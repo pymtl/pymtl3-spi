@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-PacketDisassembler.py
+PacketDisassemblerPRTL.py
 ==========================================================================
 PacketDisassembler with variable nbits_in and nbits_out. 
 Input: one big packet of size nbits_in Output: small packets of size nbits_out.
@@ -19,7 +19,7 @@ from pymtl3.stdlib.basic_rtl import Mux
 from pymtl3.stdlib.stream.ifcs import MinionIfcRTL
 from math import ceil
 
-class PacketDisassembler( Component ):
+class PacketDisassemblerPRTL( Component ):
 
   def construct( s, nbits_in, nbits_out ):
 

@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-PacketAssembler.py
+PacketAssemblerPRTL.py
 ==========================================================================
 PacketAssembler with variable nbits_in and nbits_out. 
 Input: small packets of size nbits_in Output: one big packet of size nbits_out.
@@ -15,7 +15,7 @@ from pymtl3 import *
 from math import ceil
 from pymtl3.stdlib.stream.ifcs import MinionIfcRTL
 
-class PacketAssembler( Component ):
+class PacketAssemblerPRTL( Component ):
 
   def construct( s, nbits_in, nbits_out ):
 
