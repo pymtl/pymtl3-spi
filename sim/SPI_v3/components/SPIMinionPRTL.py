@@ -2,6 +2,9 @@
 ==========================================================================
 SPIMinionPRTL.py
 ==========================================================================
+SPIMinion module. Supports SPI mode 3
+
+Author : Yanghui Ou, Modified by Kyle Infantino
 '''
 
 from pymtl3 import *
@@ -23,6 +26,8 @@ class SPIMinionPRTL( Component ):
 
     s.push = PushOutIfc( s.nbits )
     s.pull = PullInIfc ( s.nbits )
+
+    s.parity = OutPort()
 
     # Components & Logic
     s.cs_sync = Synchronizer(1)
@@ -53,6 +58,9 @@ class SPIMinionPRTL( Component ):
     s.pull.en       //= s.cs_sync.negedge_
     s.push.en       //= s.cs_sync.posedge_
     s.push.msg      //= s.shreg_in.out
+
+    s.parity //= lambda: reduce_xor(s.push.msg[0:s.nbits-2]) & s.push.en
+
 
   def line_trace( s ):
 

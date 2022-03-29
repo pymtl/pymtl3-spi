@@ -31,6 +31,7 @@ class SPIMinionVRTL( VerilogPlaceholder, Component ):
     s.spi_min = SPIMinionIfc()
     s.push = PushOutIfc( nbits )
     s.pull = PullInIfc ( nbits )
+    s.parity = OutPort()
 
     s.set_metadata( VerilogPlaceholderPass.port_map, {
       s.spi_min.cs    : 'cs',
@@ -43,6 +44,7 @@ class SPIMinionVRTL( VerilogPlaceholder, Component ):
 
       s.pull.en  : 'pull_en',
       s.pull.msg : 'pull_msg',
+      s.parity   : 'parity'
     })
 
 # For to force testing a specific RTL language

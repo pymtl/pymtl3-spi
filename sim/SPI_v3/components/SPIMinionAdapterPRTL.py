@@ -40,6 +40,8 @@ class SPIMinionAdapterPRTL( Component ):
     s.recv = RecvIfcRTL( mk_bits(nbits-2))
     s.send = SendIfcRTL( mk_bits(nbits-2))
 
+    s.parity = OutPort()
+
     s.mc_recv_val = Wire(1) 
     s.cm_send_rdy = Wire(1) 
     s.open_entries = Wire(1)
@@ -56,6 +58,8 @@ class SPIMinionAdapterPRTL( Component ):
     s.cm_q.recv.rdy //= s.recv.rdy
     s.cm_q.recv.msg //= s.recv.msg
     s.cm_q.send.rdy //= s.cm_send_rdy
+
+    s.parity //= lambda: reduce_xor(s.send.msg) & s.send.val
  
     @update
     def comb_block():
