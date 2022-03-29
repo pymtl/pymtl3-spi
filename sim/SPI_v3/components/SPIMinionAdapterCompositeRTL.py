@@ -33,6 +33,9 @@ class SPIMinionAdapterCompositeVRTL( VerilogPlaceholder, Component ):
     s.recv = RecvIfcRTL( mk_bits(nbits-2))
     s.send = SendIfcRTL( mk_bits(nbits-2))
 
+    s.minion_parity = OutPort()
+    s.adapter_parity = OutPort()
+
     s.set_metadata( VerilogPlaceholderPass.port_map, {
       s.spi_min.cs    : 'cs',
       s.spi_min.sclk  : 'sclk',
@@ -46,6 +49,9 @@ class SPIMinionAdapterCompositeVRTL( VerilogPlaceholder, Component ):
       s.send.val  : 'send_val',
       s.send.rdy  : 'send_rdy',
       s.send.msg  : 'send_msg',
+
+      s.minion_parity  : 'minion_parity',
+      s.adapter_parity : 'adapter_parity'
     })
 
 # For to force testing a specific RTL language

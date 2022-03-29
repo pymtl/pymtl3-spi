@@ -25,8 +25,12 @@ class SPIMinionAdapterCompositePRTL( Component ):
     s.recv = RecvIfcRTL( mk_bits(nbits-2))
     s.send = SendIfcRTL( mk_bits(nbits-2))
 
+    s.minion_parity = OutPort()
+    s.adapter_parity = OutPort()
+
     s.minion = m = SPIMinionPRTL(nbits)
     m.spi_min //= s.spi_min
+    m.parity //= s.minion_parity
 
     s.adapter = a = SPIMinionAdapterPRTL(nbits,num_entries)
     a.pull.en //= m.pull.en
@@ -37,6 +41,7 @@ class SPIMinionAdapterCompositePRTL( Component ):
     a.push.msg.val_wrt //= m.push.msg[nbits-1]
     a.push.msg.val_rd //= m.push.msg[nbits-2]
     a.push.msg.data //= m.push.msg[0:nbits-2]
+    a.parity //= s.adapter_parity
 
     a.send //= s.send
     a.recv //= s.recv
