@@ -24,12 +24,12 @@ module SPI_v3_components_PacketAssemblerVRTL
                                  
     output logic                  resp_val,
     input  logic                  resp_rdy,
-    output  logic [nbits_out-1:0] resp_msg
+    output logic [nbits_out-1:0]  resp_msg
 );
 
-  logic [num_regs-1:0][nbits_in-1:0]  regs;
-  logic [$clog2(num_regs):0]          counter; // the +1 is because we count up to num_regs e.g. if num_regs=2 then counter must go from 0->1->2
-  logic [(nbits_in*num_regs)-1:0] temp_out; // bigger than out, holds the concatenated reg[i].out values
+  logic [num_regs-1:0][nbits_in-1:0] regs;
+  logic [$clog2(num_regs):0]         counter; // the +1 is because we count up to num_regs e.g. if num_regs=2 then counter must go from 0->1->2
+  logic [(nbits_in*num_regs)-1:0]    temp_out; // bigger than out, holds the concatenated reg[i].out values
 
   assign req_rdy  = counter != num_regs;
   assign resp_val = counter == num_regs;

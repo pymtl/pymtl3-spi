@@ -194,5 +194,23 @@ module vc_Mux8
 
 endmodule
 
+//------------------------------------------------------------------------
+// N Input Mux
+//------------------------------------------------------------------------
+
+module vc_MuxN
+#(
+  parameter p_nbits = 1,
+  parameter p_ninputs = 2
+)(
+  input  logic [p_ninputs-1:0][p_nbits-1:0] in,
+  input  logic [$clog2(p_ninputs)-1:0]      sel,
+  output logic [p_nbits-1:0]                out
+);
+
+  assign out = in[sel];
+
+endmodule
+
 `endif /* VC_MUXES_V */
 

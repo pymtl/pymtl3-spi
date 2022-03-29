@@ -27,22 +27,22 @@ class PacketDisassemblerVRTL( VerilogPlaceholder, Component ):
 
     s.set_metadata( VerilogTranslationPass.explicit_module_name, f'PacketDisassemblerRTL_{nbits_in}nbits_in_{nbits_out}nbits_out' )
 
-    # s.spi_min = SPIMinionIfc()
-    # s.push = PushOutIfc( nbits )
-    # s.pull = PullInIfc ( nbits )
+    s.nbits_in = nbits_in
+    s.nbits_out = nbits_out
+    num_regs = (nbits_in//nbits_out) if ((nbits_in % nbits_out) == 0) else (nbits_in//nbits_out + 1)
+    reg_bits = clog2(num_regs)
 
-    # s.set_metadata( VerilogPlaceholderPass.port_map, {
-    #   s.spi_min.cs    : 'cs',
-    #   s.spi_min.sclk  : 'sclk',
-    #   s.spi_min.mosi  : 'mosi',
-    #   s.spi_min.miso  : 'miso',
+    s.disassem_ifc = MinionIfcRTL(mk_bits(s.nbits_in), mk_bits(s.nbits_out))
 
-    #   s.push.en  : 'push_en',
-    #   s.push.msg : 'push_msg',
+    s.set_metadata( VerilogPlaceholderPass.port_map, {
+      s.disassem_ifc.req.rdy  : 'req_rdy',
+      s.disassem_ifc.req.val  : 'req_val',
+      s.disassem_ifc.req.msg  : 'req_msg',
+      s.disassem_ifc.resp.rdy : 'resp_rdy',
+      s.disassem_ifc.resp.val : 'resp_val',
+      s.disassem_ifc.resp.msg : 'resp_msg',
 
-    #   s.pull.en  : 'pull_en',
-    #   s.pull.msg : 'pull_msg',
-    # })
+    })
 
 # For to force testing a specific RTL language
 import sys
