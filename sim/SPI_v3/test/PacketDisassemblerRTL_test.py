@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-PacketDisassembler_test.py
+PacketDisassemblerRTL_test.py
 ==========================================================================
 Unit test for PacketDisassembler.
 '''
@@ -8,7 +8,7 @@ Unit test for PacketDisassembler.
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
 
-from ..components.PacketDisassembler import PacketDisassembler
+from ..components.PacketDisassemblerRTL import PacketDisassemblerRTL
 
 # Helper function
 def t( dut, req_val, req_rdy, resp_val, resp_rdy, in_, out):
@@ -35,10 +35,8 @@ def t( dut, req_val, req_rdy, resp_val, resp_rdy, in_, out):
 # # Test vectors
 
 def test_16x8(cmdline_opts):
-  '''
-  This test is for PacketDisassembler(16,8)
-  '''
-  dut = PacketDisassembler(16, 8)
+
+  dut = PacketDisassemblerRTL(16, 8)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
@@ -82,10 +80,8 @@ def test_16x8(cmdline_opts):
   t(   dut,  0,      1,      0,       1,     0xCC,    '?' ) 
 
 def test_16x4(cmdline_opts):
-  '''
-  This test is for PacketDisassembler(16,4)
-  '''
-  dut = PacketDisassembler(16, 4)
+
+  dut = PacketDisassemblerRTL(16, 4)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
@@ -141,10 +137,8 @@ def test_16x4(cmdline_opts):
   t(   dut,  0,      1,      0,       1,     0xCC,    '?' ) 
 
 def test_5x1(cmdline_opts):
-  '''
-  This test is for PacketDisassembler(5,1)
-  '''
-  dut = PacketDisassembler(5, 1)
+
+  dut = PacketDisassemblerRTL(5, 1)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
@@ -206,10 +200,8 @@ def test_5x1(cmdline_opts):
   t(   dut,  0,      1,      0,       1,     0x0,    '?' ) 
 
 def test_7x3(cmdline_opts):
-  '''
-  This test is for PacketDisassembler(7,3)
-  '''
-  dut = PacketDisassembler(7,3)
+
+  dut = PacketDisassemblerRTL(7,3)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
@@ -267,10 +259,8 @@ def test_7x3(cmdline_opts):
   t(   dut,  0,      1,      0,       1,     0x00,    '?' )
 
 def test_8x3(cmdline_opts):
-  '''
-  This test is for PacketDisassembler(8,3)
-  '''
-  dut = PacketDisassembler(8,3)
+
+  dut = PacketDisassemblerRTL(8,3)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 

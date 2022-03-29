@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-PacketAssembler_test.py
+PacketAssemblerRTL_test.py
 ==========================================================================
 Unit test for PacketAssembler.
 '''
@@ -8,7 +8,7 @@ Unit test for PacketAssembler.
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
 
-from ..components.PacketAssembler import PacketAssembler
+from ..components.PacketAssemblerRTL import PacketAssemblerRTL
 
 # Helper function
 def t( dut, req_val, req_rdy, resp_val, resp_rdy, in_, out):
@@ -35,10 +35,8 @@ def t( dut, req_val, req_rdy, resp_val, resp_rdy, in_, out):
 # # Test vectors
 
 def test_8x16(cmdline_opts):
-  '''
-  This test is for PacketAssembler(8,16)
-  '''
-  dut = PacketAssembler(8, 16)
+
+  dut = PacketAssemblerRTL(8, 16)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
@@ -80,10 +78,8 @@ def test_8x16(cmdline_opts):
   t(   dut,  0,      0,      1,       1,     0xCC,    0xDDEE ) 
 
 def test_8x32(cmdline_opts):
-  '''
-  This test is for PacketAssembler(8,32)
-  '''
-  dut = PacketAssembler(8, 32)
+
+  dut = PacketAssemblerRTL(8, 32)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
@@ -123,10 +119,8 @@ def test_8x32(cmdline_opts):
   t( dut,    0,      0,      1,       1,     0xCC,    0xACBDEFCD ) 
 
 def test_7x25(cmdline_opts):
-  '''
-  This test is for PacketAssembler(7,25)
-  '''
-  dut = PacketAssembler(7, 25)
+
+  dut = PacketAssemblerRTL(7, 25)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
@@ -145,10 +139,8 @@ def test_7x25(cmdline_opts):
   t( dut,    0,      0,      1,       1,     0x1B,    0x0228E55 )  # resp_rdy is 1 and message is outputted correctly
 
 def test_3x7(cmdline_opts):
-  '''
-  This test is for PacketAssembler(3,7)
-  '''
-  dut = PacketAssembler(3, 7)
+
+  dut = PacketAssemblerRTL(3, 7)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
@@ -189,10 +181,8 @@ def test_3x7(cmdline_opts):
   t(   dut,  0,      0,      1,       1,     0x0,    0x2C ) 
 
 def test_7x7(cmdline_opts):
-  '''
-  This test is for PacketAssembler(7,7)
-  '''
-  dut = PacketAssembler(7, 7)
+
+  dut = PacketAssemblerRTL(7, 7)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
@@ -213,10 +203,8 @@ def test_7x7(cmdline_opts):
   t( dut,    0,      0,      1,       1,     0x0,     0x1B) 
 
 def test_1x4(cmdline_opts):
-  '''
-  This test is for PacketAssembler(1,4)
-  '''
-  dut = PacketAssembler(1, 4)
+
+  dut = PacketAssemblerRTL(1, 4)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
