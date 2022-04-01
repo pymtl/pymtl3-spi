@@ -11,7 +11,7 @@
 //     Input is 0xABCD. 0xAB will go into reg[1] and 0xCD will go into reg[0].
 //     Next cycle the Disassembler will output 0xAB. The cycle after that 0xCD will be outputted
 
-`include "SPI_v3/vc/muxes.v" 
+`include "vc/muxes.v" 
 
 module SPI_v3_components_PacketDisassemblerVRTL
 #(

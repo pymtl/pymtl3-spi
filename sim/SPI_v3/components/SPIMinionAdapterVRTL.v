@@ -1,7 +1,7 @@
 //-------------------------------------------------------------------------
 // SPIMinionAdapterVRTL.v
 //-------------------------------------------------------------------------
-`include "SPI_v3/vc/queues.v"
+`include "vc/queues.v"
 
 module SPI_v3_components_SPIMinionAdapterVRTL
 #(
