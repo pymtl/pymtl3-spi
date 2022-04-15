@@ -1,8 +1,10 @@
 '''
 ==========================================================================
-SPITestHarness.py
+SPIPhysicalTestHarness.py
 ==========================================================================
-Test harness for sending messages over SPI. For use with SPIMinionAdapterComposite module
+Test harness for sending messages over SPI. For use with SPIMinionAdapterComposite module.
+This module is designed for post-silicon testing using the SPI Driver found here: https://spidriver.com
+Documentation for the corresponding spidriver library can be found here: https://spidriver.readthedocs.io/en/latest/index.html
 
 Author : Kyle Infantino and Dilan Lakhani
   Date : Jan 30, 2022
@@ -13,6 +15,8 @@ from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
 
 from math import ceil
 import copy
+
+from spidriver import SPIDriver
 
 #=========================================================================
 # TestHarness
@@ -27,23 +31,16 @@ class SPITestHarness( object ):
   #-----------------------------------------------------------------------
   # DESIGN: instantiation of RTL design
   # num_components: number of components that can be addressed
-  # spi_bits: number of bits in an spi packet. Each packet consists of 2 
+  # spi_bits: must be factor of 8
+  #           number of bits in an spi packet. Each packet consists of 2 
   #           flow control bits, (optional) component address bits, and the data
+  # port: path to SPIDriver port on device (ex. "/dev/ttyUSB0")
   #-----------------------------------------------------------------------
-  def __init__( s, DESIGN, num_components, spi_bits, cmdline_opts, trace=True ):
- 
-    s.dut = DESIGN
-    s.dut = config_model_with_cmdline_opts( s.dut, cmdline_opts, [] )
-    # s.dut.apply(DefaultPassGroup(linetrace=True)) #commented out for chip-sim
-    from pymtl3.passes.mamba import Mamba2020
-    s.dut.apply( Mamba2020( print_line_trace=trace ) )
+  def __init__( s, DESIGN, num_components, spi_bits, port, cmdline_opts, trace=True ):
 
-    s.dut.spi_min.cs @= 1
-    s.dut.spi_min.sclk @= 0
-    s.dut.spi_min.mosi @= 0
-    s.dut.spi_min.miso @= 0
-
-    s.dut.sim_reset() # Reset the simulator
+    s.driver = SPIDriver(port) # change for your port
+    s.driver.setmode(3) # set to SPI mode 3
+    s.driver.unsel() # raise CS line
 
     s.spi_bits = spi_bits
     s.component_bits = 0 if num_components < 2 else clog2(num_components)
@@ -166,58 +163,7 @@ class SPITestHarness( object ):
 
   #helper functions
   def _t_spi( s, pkt ): #send spi packets
-    s._start_transaction()
-    resp_spi = Bits1(0)
-    for i in range(s.spi_bits):
-      resp_bit = s._send_bit( pkt[s.spi_bits - i - 1] ) #send most significant bits first
-      if i == 0:
-        resp_spi = resp_bit
-      else:
-        resp_spi = concat( resp_spi, resp_bit )
-    s._end_transaction()
-    return copy.deepcopy(resp_spi)
-
-  def _start_transaction( s ): #send bits
-    # Starts a transaction by keeping cs HIGH for 3 cycles then pulling cs LOW 
-    for i in range(3): # cs = 1
-      # Write input values to input ports
-      s.dut.spi_min.sclk        @= 0
-      s.dut.spi_min.cs          @= 1
-      s.dut.spi_min.mosi        @= 1 # mosi is a dont care here bc CS is high
-      s.dut.sim_eval_combinational()
-      # Tick simulator one cycle
-      s.dut.sim_tick()
-    for i in range(3): # cs = 0, three cycles because the synchronizer takes 2 cycles for negedge to appear
-      s.dut.spi_min.sclk        @= 0
-      s.dut.spi_min.cs          @= 0
-      s.dut.spi_min.mosi        @= 1 # mosi is a dont care here bc CS is high
-      s.dut.sim_eval_combinational()
-      s.dut.sim_tick()
-
-  def _end_transaction( s ):
-    s.dut.spi_min.sclk        @= 0
-    s.dut.spi_min.cs          @= 1
-    s.dut.spi_min.mosi        @= 1 # mosi is a dont care here bc CS is high
-    s.dut.sim_eval_combinational()
-    s.dut.sim_tick()
-
-  def _send_bit( s, mosi): #send bits
-    # This function sends bits over SPI once the transaction has been started (CS is already low)
-    for i in range(3): # sclk = 0
-      # Write input values to input ports
-      s.dut.spi_min.sclk        @= 0
-      s.dut.spi_min.cs          @= 0
-      s.dut.spi_min.mosi        @= mosi
-      s.dut.sim_eval_combinational()
-      # Tick simulator one cycle
-      s.dut.sim_tick()
-
-    for i in range(3): # sclk = 1
-      s.dut.spi_min.sclk        @= 1
-      s.dut.spi_min.cs          @= 0
-      s.dut.spi_min.mosi        @= mosi
-      s.dut.sim_eval_combinational()
-      s.dut.sim_tick()
-
-    # only return MISO after 8th cycle so it has time to reflect correct value
-    return copy.deepcopy(s.dut.spi_min.miso) 
+    s.driver.sel()
+    rec_msg = s.driver.writeread(s.spi_bits//8)
+    s.driver.unsel()
+    return rec_msg
