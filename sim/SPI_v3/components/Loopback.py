@@ -38,11 +38,11 @@ class Loopback( Component ):
     # Logic
     @update
     def up_comb():
-        s.transaction_val.en @= (s.recv.val & s.recv.rdy) | (s.send.val & s.send.rdy)
-        s.transaction_val.in_ @=  (s.recv.val & s.recv.rdy)
+      s.transaction_val.en @= (s.recv.val & s.recv.rdy) | (s.send.val & s.send.rdy)
+      s.transaction_val.in_ @=  (s.recv.val & s.recv.rdy)
 
-        s.reg_.en @= s.recv.val & s.recv.rdy
-        s.reg_.in_ @= s.recv.msg
+      s.reg_.en @= s.recv.val & s.recv.rdy
+      s.reg_.in_ @= s.recv.msg
         
 
   def line_trace( s ):

@@ -69,20 +69,20 @@ class PacketDisassemblerPRTL( Component ):
     # Sequential Reg Update Logic
     @update_ff
     def up_regs():
-        for i in range(s.num_regs):
-          if s.disassem_ifc.req.val & s.disassem_ifc.req.rdy: # if valid input packet
-            if i == (s.num_regs - 1): # this is the top register
-              s.regs[i] <<= zext(s.disassem_ifc.req.msg[ (s.nbits_out*s.num_regs-s.nbits_out) : s.nbits_in ], s.nbits_out) # holds MSb, zext to fit register size 
-            else:
-              s.regs[i] <<= s.disassem_ifc.req.msg[s.nbits_out*(i) : (s.nbits_out*i + s.nbits_out) ]
+      for i in range(s.num_regs):
+        if s.disassem_ifc.req.val & s.disassem_ifc.req.rdy: # if valid input packet
+          if i == (s.num_regs - 1): # this is the top register
+            s.regs[i] <<= zext(s.disassem_ifc.req.msg[ (s.nbits_out*s.num_regs-s.nbits_out) : s.nbits_in ], s.nbits_out) # holds MSb, zext to fit register size 
+          else:
+            s.regs[i] <<= s.disassem_ifc.req.msg[s.nbits_out*(i) : (s.nbits_out*i + s.nbits_out) ]
 
     # Mux and Output Logic
     @update
     def up_comb():
-        for i in range(s.num_regs):
-            s.reg_mux.in_[i] @= s.regs[i]
-        s.reg_mux.sel @= trunc(s.num_regs - s.counter - 1, s.reg_bits)
-        s.disassem_ifc.resp.msg @= s.reg_mux.out
+      for i in range(s.num_regs):
+          s.reg_mux.in_[i] @= s.regs[i]
+      s.reg_mux.sel @= trunc(s.num_regs - s.counter - 1, s.reg_bits)
+      s.disassem_ifc.resp.msg @= s.reg_mux.out
 
 
   def line_trace( s ):
