@@ -37,18 +37,18 @@ module SPI_v3_components_PacketAssemblerVRTL
 
 
   always_ff @(posedge clk) begin
-      if (reset | (resp_val & resp_rdy)) begin // if reset or you have sent the packet
-        counter <= 0;
-      end
-      else if (resp_val & ~resp_rdy) begin // if response is valid but can't send yet
-        counter <= counter;
-      end
-      else if (req_val & req_rdy) begin // if you receive another piece of the packet
-        counter <= counter + 1;
-      end
-      else begin
-        counter <= counter;
-      end
+    if (reset | (resp_val & resp_rdy)) begin // if reset or you have sent the packet
+      counter <= 0;
+    end
+    else if (resp_val & ~resp_rdy) begin // if response is valid but can't send yet
+      counter <= counter;
+    end
+    else if (req_val & req_rdy) begin // if you receive another piece of the packet
+      counter <= counter + 1;
+    end
+    else begin
+      counter <= counter;
+    end
   end
 
   genvar i;
