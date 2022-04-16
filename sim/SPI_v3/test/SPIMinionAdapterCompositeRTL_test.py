@@ -140,13 +140,13 @@ def t( dut, cs, sclk, mosi, miso, recv_val, recv_rdy, recv_msg, send_val, send_r
   assert dut.spi_min.miso == miso
 
   if recv_rdy != '?':
-      assert dut.recv.rdy == recv_rdy
+    assert dut.recv.rdy == recv_rdy
 
   if send_val != '?':
-      assert dut.send.val == send_val
+    assert dut.send.val == send_val
     
   if send_msg != '?':
-      assert dut.send.msg == send_msg
+    assert dut.send.msg == send_msg
 
   # Tick simulator one cycle
   dut.sim_tick()

@@ -80,7 +80,7 @@ class PacketDisassemblerPRTL( Component ):
     @update
     def up_comb():
       for i in range(s.num_regs):
-          s.reg_mux.in_[i] @= s.regs[i]
+        s.reg_mux.in_[i] @= s.regs[i]
       s.reg_mux.sel @= trunc(s.num_regs - s.counter - 1, s.reg_bits)
       s.disassem_ifc.resp.msg @= s.reg_mux.out
 
