@@ -26,7 +26,9 @@ class ShiftReg( Component ):
 
     @update_ff
     def up_shreg():
-      if ( s.load_en ):
+      if s.reset: 
+        s.out <<= zext(Bits1(0), s.nbits) # for 4 state sim
+      elif ( s.load_en ):
         s.out <<= s.load_data
       elif ( ~s.load_en & s.shift_en ):
         s.out <<= concat( s.out[0:s.nbits-1], s.in_ )

@@ -13,8 +13,9 @@ from pymtl3 import *
 
 class Synchronizer( Component ):
 
-  def construct( s ):
+  def construct( s, reset_value=0 ):
 
+    s.reset_value = Bits1(reset_value)
     # Interface
 
     s.in_      = InPort()
@@ -28,7 +29,8 @@ class Synchronizer( Component ):
 
     @update_ff
     def up_shreg():
-      s.shreg <<= concat( s.shreg[0:2], s.in_ )
+      if s.reset: s.shreg <<= concat(s.reset_value,s.reset_value,s.reset_value) #for 4 state sim
+      else: s.shreg <<= concat( s.shreg[0:2], s.in_ )
 
     s.out      //= s.shreg[1]
     s.posedge_ //= lambda: ~s.shreg[2] & s.shreg[1]

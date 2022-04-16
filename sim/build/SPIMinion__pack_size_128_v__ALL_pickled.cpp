@@ -1,8 +1,0 @@
-#include "SPIMinion__pack_size_128_v.cpp"
-#include "obj_dir_SPIMinion__pack_size_128/VSPIMinion__pack_size_128.cpp"
-#include "obj_dir_SPIMinion__pack_size_128/VSPIMinion__pack_size_128__Trace.cpp"
-#include "/classes/ece5745/install/stow-pkgs/x86_64-rhel7/share/verilator/include/verilated.cpp"
-#include "/classes/ece5745/install/stow-pkgs/x86_64-rhel7/share/verilator/include/verilated_vcd_c.cpp"
-#include "obj_dir_SPIMinion__pack_size_128/VSPIMinion__pack_size_128__Slow.cpp"
-#include "obj_dir_SPIMinion__pack_size_128/VSPIMinion__pack_size_128__Syms.cpp"
-#include "obj_dir_SPIMinion__pack_size_128/VSPIMinion__pack_size_128__Trace__Slow.cpp"
