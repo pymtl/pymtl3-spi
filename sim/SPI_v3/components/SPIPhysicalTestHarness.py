@@ -22,7 +22,7 @@ from spidriver import SPIDriver
 # TestHarness
 #=========================================================================
 
-class SPITestHarness( object ):
+class SPIPhysicalTestHarness( object ):
 
   #-----------------------------------------------------------------------
   # constructor
