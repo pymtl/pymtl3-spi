@@ -74,3 +74,18 @@ def test_random( cmdline_opts ):
     msg = b32( random.randint(0,0xffffffff) )
     msgs.append(msg)
   spi_harness.t_mult_msg(nbits, msgs, nbits, msgs)
+
+def test_16_bits( cmdline_opts ):
+
+  model = SPILoopbackComposite(16)
+  model.elaborate()
+
+  spi_harness = SPITestHarness( model, 0, 16, cmdline_opts)
+
+  msgs = [0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009, 0x000A, 0x000B, 0x000C, 0x000D, 0x000E, 0x000F]
+
+  for i in range(16):
+    spi_harness.t_mult_msg(14, [msgs[i]], 14, [msgs[i]])
+    # for j in range(50000000):
+    for j in range(5):
+      spi_harness.dut.sim_tick()

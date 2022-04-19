@@ -26,9 +26,13 @@ class SPILoopbackComposite( Component ):
     #Interface
 
     s.spi_min = SPIMinionIfc()
+    s.minion_parity = OutPort()
+    s.adapter_parity = OutPort()
 
     s.composite = m = SPIMinionAdapterCompositePRTL(s.nbits, 1)
     m.spi_min   //= s.spi_min
+    m.minion_parity //= s.minion_parity
+    m.adapter_parity //= s.adapter_parity
 
     s.loopback = m = Loopback(s.nbits-2)
     m.recv //= s.composite.send
