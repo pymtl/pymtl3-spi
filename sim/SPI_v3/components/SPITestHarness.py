@@ -166,6 +166,7 @@ class SPITestHarness( object ):
 
   #helper functions
   def _t_spi( s, pkt ): #send spi packets
+    print(pkt)
     s._start_transaction()
     resp_spi = Bits1(0)
     for i in range(s.spi_bits):
@@ -175,6 +176,8 @@ class SPITestHarness( object ):
       else:
         resp_spi = concat( resp_spi, resp_bit )
     s._end_transaction()
+    print("resp")
+    print(resp_spi)
     return copy.deepcopy(resp_spi)
 
   def _start_transaction( s ): #send bits
