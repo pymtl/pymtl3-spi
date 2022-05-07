@@ -49,6 +49,6 @@ class LoopThroughPRTL( Component ):
         
     def line_trace( s ):
         return f"upstream.req {s.upstream.req.val}|{s.upstream.req.rdy}|{s.upstream.req.msg}\
-                 downstream.req {s.downstream.req.val}|{s.downstream.req.rdy}|{s.downstream.req.msg}\
-                 downstream.resp {s.downstream.resp.val}|{s.downstream.resp.rdy}|{s.downstream.resp.msg}\
-                 upstream.resp {s.upstream.resp.val}|{s.upstream.resp.rdy}|{s.upstream.resp.msg}"
+ downstream.req {s.downstream.req.val}|{s.downstream.req.rdy}|{s.downstream.req.msg}\
+ downstream.resp {s.downstream.resp.val}|{s.downstream.resp.rdy}|{s.downstream.resp.msg}\
+ upstream.resp {s.upstream.resp.val}|{s.upstream.resp.rdy}|{s.upstream.resp.msg}"
