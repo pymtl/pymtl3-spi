@@ -19,13 +19,13 @@ from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
 from ..interfaces import PushInIfc, PullOutIfc
 
-class SPIMasterVRTL( VerilogPlaceholder, Component ):
+class SPIMasterValRdyVRTL( VerilogPlaceholder, Component ):
 
   # Constructor
 
-  def construct( s, nbits=34 ):
+  def construct( s, nbits=34, ncs=1 ):
 
-    s.set_metadata( VerilogTranslationPass.explicit_module_name, f'SPIMasterRTL_{nbits}nbits' )
+    s.set_metadata( VerilogTranslationPass.explicit_module_name, f'SPIMasterValRdyRTL_{nbits}nbits_{ncs}ncs' )
 
     # s.cs   = InPort ()
     # s.sclk = InPort ()
@@ -53,8 +53,8 @@ class SPIMasterVRTL( VerilogPlaceholder, Component ):
 # Import the appropriate version based on the rtl_language variable
 
 if rtl_language == 'pymtl':
-  from .SPIMasterPRTL import SPIMasterPRTL as SPIMasterRTL
+  from .SPIMasterValRdyPRTL import SPIMasterValRdyPRTL as SPIMasterValRdyRTL
 elif rtl_language == 'verilog':
-  SPIMasterRTL = SPIMasterVRTL
+  SPIMasterValRdyRTL = SPIMasterValRdyVRTL
 else:
   raise Exception("Invalid RTL language!")
