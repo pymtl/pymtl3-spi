@@ -27,7 +27,6 @@ class LoopThroughVRTL( VerilogPlaceholder, Component ):
         # Local Parameters
         s.nbits = nbits
 
-
         # Ports
 
         s.sel = InPort() # select bit, if 1 then loopback, if 0 pass through
@@ -39,7 +38,6 @@ class LoopThroughVRTL( VerilogPlaceholder, Component ):
 
         s.upstream   = MinionIfcRTL( mk_bits(s.nbits), mk_bits(s.nbits) ) 
         s.downstream = MasterIfcRTL( mk_bits(s.nbits), mk_bits(s.nbits) )
-
 
         s.set_metadata( VerilogPlaceholderPass.params, { 'nbits' : nbits } )
         s.set_metadata( VerilogPlaceholderPass.port_map, {

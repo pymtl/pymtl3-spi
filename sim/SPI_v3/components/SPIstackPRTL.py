@@ -19,7 +19,7 @@ from .LoopThroughPRTL import LoopThroughPRTL
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 from ..interfaces.SPIIfc import SPIMinionIfc
 
-class SPIStackPRTL( Component ):
+class SPIstackPRTL( Component ):
 
   def construct( s, nbits=34, num_entries=1 ):
     s.nbits = nbits
@@ -52,6 +52,6 @@ class SPIStackPRTL( Component ):
   def line_trace( s ):
         return f"send {s.send.val}|{s.send.rdy}|{s.send.msg}\
  recv {s.recv.val}|{s.recv.rdy}|{s.recv.msg}\
- loopthrough_sel {s.loopthrough_sel}\
- minion_parity {s.minion_parity}\
- adapter_parity {s.adapter_parity}"
+ lt_sel|{s.loopthrough_sel}\
+ mp|{s.minion_parity}\
+ ap|{s.adapter_parity}"
