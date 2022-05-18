@@ -4,7 +4,11 @@ SPIMinionPRTL.py
 ==========================================================================
 SPIMinion module. Supports SPI mode 3
 
+<<<<<<< HEAD
+Author : Yanghui Ou
+=======
 Author : Yanghui Ou, Modified by Kyle Infantino
+>>>>>>> c7560d05b108c8e0cfe84bff346ce40c93487785
 '''
 
 from pymtl3 import *

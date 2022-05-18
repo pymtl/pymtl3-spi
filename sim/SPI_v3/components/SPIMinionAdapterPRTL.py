@@ -3,6 +3,7 @@
 SPIMinionAdapterPRTL.py
 ==========================================================================
 An Adapter that converts push/pull interface from SPI to val/rdy interfaces. 
+Support SPI modes 0 and 3
 
 Author : Kyle Infantino
 Date : Nov 30, 2021
