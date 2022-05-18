@@ -36,7 +36,7 @@ class SPIPhysicalTestHarness( object ):
   #           flow control bits, (optional) component address bits, and the data
   # port: path to SPIDriver port on device (ex. "/dev/ttyUSB0")
   #-----------------------------------------------------------------------
-  def __init__( s, DESIGN, num_components, spi_bits, port, cmdline_opts, trace=True ):
+  def __init__( s, num_components, spi_bits, port, cmdline_opts, trace=True ):
 
     s.driver = SPIDriver(port) # change for your port
     # s.driver.setmode(3) # set to SPI mode 3
@@ -164,6 +164,12 @@ class SPIPhysicalTestHarness( object ):
   #helper functions
   def _t_spi( s, pkt ): #send spi packets
     s.driver.sel()
+    print("packet")
+    print(pkt)
     rec_msg = s.driver.writeread([pkt])
+    print(rec_msg)
+    print(type(rec_msg))
+    print(int.from_bytes(rec_msg, "big"))
+    print(rec_msg.decode())
     s.driver.unsel()
     return rec_msg

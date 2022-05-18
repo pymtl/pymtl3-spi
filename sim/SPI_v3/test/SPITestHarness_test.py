@@ -79,13 +79,29 @@ def test_16_bits( cmdline_opts ):
 
   model = SPILoopbackComposite(16)
   model.elaborate()
-
   spi_harness = SPITestHarness( model, 0, 16, cmdline_opts)
 
-  msgs = [0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009, 0x000A, 0x000B, 0x000C, 0x000D, 0x000E, 0x000F]
+  msgs = [0x0000, 0x0101, 0x0202, 0x0303, 0x0404, 0x0505, 0x0606, 0x0707, 0x0808, 0x0909, 0x0A0A, 0x0B0B, 0x0C0C, 0x0D0D, 0x0E0E, 0x0F0F]
 
   for i in range(16):
     spi_harness.t_mult_msg(14, [msgs[i]], 14, [msgs[i]])
+    send = 0x3fff
+    print(send)
+    spi_harness.t_mult_msg(14, [send], 14, [send])
     # for j in range(50000000):
-    for j in range(5):
-      spi_harness.dut.sim_tick()
+    # # for j in range(5):
+    #   spi_harness.dut.sim_tick()
+
+def test_37_bits( cmdline_opts ):
+
+  model = SPILoopbackComposite(37)
+  model.elaborate()
+  spi_harness = SPITestHarness( model, 0, 37, cmdline_opts)
+
+  msgs = [0x0000, 0x0101, 0x0202, 0x0303, 0x0404, 0x0505, 0x0606, 0x0707, 0x0808, 0x0909, 0x0A0A, 0x0B0B, 0x0C0C, 0x0D0D, 0x0E0E, 0x0F0F]
+
+  for i in range(16):
+    spi_harness.t_mult_msg(14, [msgs[i]], 14, [msgs[i]])
+    send = 0x3fff
+    print(send)
+    spi_harness.t_mult_msg(14, [send], 14, [send])
