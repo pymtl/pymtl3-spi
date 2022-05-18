@@ -164,12 +164,6 @@ class SPIPhysicalTestHarness( object ):
   #helper functions
   def _t_spi( s, pkt ): #send spi packets
     s.driver.sel()
-    print("packet")
-    print(pkt)
-    rec_msg = s.driver.writeread([pkt])
-    print(rec_msg)
-    print(type(rec_msg))
-    print(int.from_bytes(rec_msg, "big"))
-    print(rec_msg.decode())
+    rec_msg = list(s.driver.writeread([pkt]))
     s.driver.unsel()
-    return rec_msg
+    return rec_msg[0]

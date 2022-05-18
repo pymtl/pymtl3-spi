@@ -21,7 +21,7 @@ from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 from ..interfaces.SPIIfc import SPIMinionIfc
 
 
-class SPIstackVRTL( VerilogPlaceholder, Component ):
+class SPIStackVRTL( VerilogPlaceholder, Component ):
 
   def construct( s, nbits=34, num_entries=1 ):
     s.nbits = nbits
@@ -64,10 +64,10 @@ class SPIstackVRTL( VerilogPlaceholder, Component ):
   
   def line_trace( s ):
         return f"send {s.send.val}|{s.send.rdy}|{s.send.msg}\
- recv {s.recv.val}|{s.recv.rdy}|{s.recv.msg}\
- lt_sel|{s.loopthrough_sel}\
- mp|{s.minion_parity}\
- ap|{s.adapter_parity}"
+                 recv {s.recv.val}|{s.recv.rdy}|{s.recv.msg}\
+                 lt_sel|{s.loopthrough_sel}\
+                 mp|{s.minion_parity}\
+                 ap|{s.adapter_parity}"
 
 # For to force testing a specific RTL language
 import sys
@@ -78,8 +78,8 @@ if hasattr( sys, '_called_from_test' ):
 # Import the appropriate version based on the rtl_language variable
 
 if rtl_language == 'pymtl':
-  from .SPIstackPRTL import SPIstackPRTL as SPIstackRTL
+  from .SPIStackPRTL import SPIStackPRTL as SPIStackRTL
 elif rtl_language == 'verilog':
-  SPIstackRTL = SPIstackVRTL
+  SPIStackRTL = SPIStackVRTL
 else:
   raise Exception("Invalid RTL language!")

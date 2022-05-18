@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-Loopback.py
+LoopBackPRTL.py
 ==========================================================================
 This takes receives a packet from the SPIMinionAdapter module and sends it back the next cycle to the 
 SPIMinionAdapter module. Uses val/rdy microprotocol.
@@ -15,7 +15,7 @@ from pymtl3.stdlib.basic_rtl import RegEnRst
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 
 
-class Loopback( Component ):
+class LoopBackPRTL( Component ):
     
   def construct( s, nbits=32):
     # Local Parameters

@@ -8,7 +8,7 @@
 `include "SPI_v3/components/LoopThroughVRTL.v"
 `include "SPI_v3/components/SPIMinionAdapterCompositeVRTL.v"
 
-module SPI_v3_components_SPIstackVRTL 
+module SPI_v3_components_SPIStackVRTL 
 #(
     parameter nbits = 34, // the size of the val/rdy msg for the SPI minion
     parameter num_entries = 1

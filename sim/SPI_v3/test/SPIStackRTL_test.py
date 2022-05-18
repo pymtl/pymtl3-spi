@@ -1,18 +1,18 @@
 '''
 ==========================================================================
-SPIMinionAdapterCompositeRTL_test.py
+SPIStackRTL_test.py
 ==========================================================================
-Unit test for SPIMinionAdapterCompositeRTL.
+Unit test for SPIStack.
 '''
 
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
 
-from ..components.SPIstackRTL import SPIstackRTL
+from ..components.SPIStackRTL import SPIStackRTL
 
 def test_basic( cmdline_opts ):
 
-  dut = SPIstackRTL(4,1)
+  dut = SPIStackRTL(4,1)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
@@ -155,7 +155,7 @@ def t( dut, cs, sclk, mosi, miso, recv_val, recv_rdy, recv_msg, send_val, send_r
 
 def test_loopback( cmdline_opts ):
 
-  dut = SPIstackRTL( 4, 1 )
+  dut = SPIStackRTL( 4, 1 )
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 

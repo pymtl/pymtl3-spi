@@ -8,12 +8,12 @@ Unit test for SPILoopbackComposite.
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
 
-from ..components.SPILoopbackComposite import SPILoopbackComposite
+from ..components.SPILoopBackCompositeRTL import SPILoopBackCompositeRTL
 
 
 def test_basic( cmdline_opts ):
 
-  dut = SPILoopbackComposite( 4 )
+  dut = SPILoopBackCompositeRTL( 4 )
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 

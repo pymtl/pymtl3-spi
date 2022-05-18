@@ -12,7 +12,6 @@ Author : Kyle Infantino
 
 from pymtl3 import *
 from .ShiftReg import ShiftReg, ShiftRegExtRst
-# from .SclkCountdownPRTL import SclkCountdownPRTL
 
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 from pymtl3.stdlib.basic_rtl.registers import RegEnRst
@@ -56,8 +55,8 @@ class SPIMasterValRdyPRTL( Component ):
     s.STATE_INIT        = 0
     s.STATE_START0      = 1 # pull chip select low
     s.STATE_START1      = 2 # wait a cycle
-    s.STATE_SCLK_HIGH    = 3 # start toggling sclk
-    s.STATE_SCLK_LOW   = 4
+    s.STATE_SCLK_HIGH   = 3 # start toggling sclk
+    s.STATE_SCLK_LOW    = 4
     s.STATE_CS_LOW_WAIT = 5
     s.STATE_DONE        = 6
 
@@ -184,7 +183,7 @@ class SPIMasterValRdyPRTL( Component ):
     m.in_       //= 0
     m.shift_en  //= s.sclk_negedge
     m.load_en   //= lambda: s.recv.rdy & s.recv.val
-    m.load_data //= lambda: s.recv.msg << ((s.nbits-s.packet_size_reg.out)) # put message into most significant bits
+    m.load_data //= lambda: s.recv.msg << zext(((s.nbits-s.packet_size_reg.out)), s.nbits) # put message into most significant bits
 
     s.mosi     //= s.shreg_out.out[nbits-1]
     s.send.msg //= s.shreg_in.out
