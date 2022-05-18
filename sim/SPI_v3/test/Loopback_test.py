@@ -32,13 +32,11 @@ def t( dut, recv_val, recv_rdy, send_val, send_rdy, recv_msg, send_msg):
   # Tick simulator one cycle
   dut.sim_tick()
 
-# # Test vectors
+# Test vectors
 
-
+# This test is for Loopback(32)
 def test_basic(cmdline_opts):
-  '''
-  This test is for Loopback(32)
-  '''
+
   dut = Loopback(32)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
@@ -48,22 +46,13 @@ def test_basic(cmdline_opts):
   dut.send.rdy  @= 0
   dut.sim_reset()
   #       recv_val recv_rdy send_val send_rdy recv_msg   send_msg
-  t( dut,    1,      1,        0,       0,     0xABCD,    '?' ) # start transactiojn
+  t( dut,    1,      1,        0,       0,     0xABCD,    '?' ) # start transaction
   t( dut,    1,      1,        1,       1,     0xDCBA,    0xABCD ) 
   t( dut,    0,      1,        1,       1,     0x0001,    0xDCBA )
   t( dut,    1,      1,        0,       0,     0x0400,    '?' ) 
   t( dut,    0,      0,        1,       0,     0x0000,    '?' ) 
   t( dut,    0,      0,        1,       0,     0x0000,    '?' ) 
   t( dut,    0,      1,        1,       1,     0x0000,    0x0400 ) 
-  
-  
-  
-#   t( dut,    0,      0,      1,       0,     0x0000,    '?' ) 
-#   t( dut,    0,      0,      1,       0,     0x0000,    '?' ) 
-#   t( dut,    0,      0,      1,       0,     0x0000,    '?' ) 
-#   t( dut,    0,      0,      1,       0,     0x0000,    '?' ) 
-#   t( dut,    0,      0,      1,       0,     0x0000,    '?' ) 
-#   t( dut,    0,      0,      1,       1,     0x0000,    0xAABBCCDD )  
 
 
 

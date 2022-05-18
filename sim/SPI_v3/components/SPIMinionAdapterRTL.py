@@ -57,6 +57,8 @@ class SPIMinionAdapterVRTL( VerilogPlaceholder, Component ):
     s.push_msg_val_rd   = InPort(1)
     s.push_msg_data     = InPort(nbits-2) 
 
+    s.parity = OutPort()
+
     s.set_metadata( VerilogPlaceholderPass.port_map, {
         s.pull_en          : 'pull_en',
         s.pull_msg_val     : 'pull_msg_val',
@@ -71,7 +73,8 @@ class SPIMinionAdapterVRTL( VerilogPlaceholder, Component ):
         s.recv.val         : 'recv_val',
         s.send.msg         : 'send_msg',
         s.send.rdy         : 'send_rdy',
-        s.send.val         : 'send_val'  
+        s.send.val         : 'send_val',
+        s.parity           : 'parity'
     })
 
 class SPIMinionAdapterOuterVRTL( Component ):

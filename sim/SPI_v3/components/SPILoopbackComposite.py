@@ -13,27 +13,26 @@ Author : Kyle Infantino
 from pymtl3 import *
 from .SPIMinionAdapterCompositePRTL import SPIMinionAdapterCompositePRTL
 from .Loopback import Loopback
+from ..interfaces.SPIIfc import SPIMinionIfc
 
 class SPILoopbackComposite( Component ):
 
   def construct( s, nbits=32 ):
 
-    s.nbits = nbits
+    #Local parameters
 
-    s.cs   = InPort ()
-    s.sclk = InPort ()
-    s.mosi = InPort ()
-    s.miso = OutPort()
+    s.nbits = nbits  # size of SPI packet including 2 bit flow control
+
+    #Interface
+
+    s.spi_min = SPIMinionIfc()
 
     s.composite = m = SPIMinionAdapterCompositePRTL(s.nbits, 1)
-    m.cs //= s.cs
-    m.sclk //= s.sclk
-    m.mosi //= s.mosi
-    m.miso //= s.miso
+    m.spi_min   //= s.spi_min
 
     s.loopback = m = Loopback(s.nbits-2)
     m.recv //= s.composite.send
     m.send //= s.composite.recv
 
   def line_trace( s ):
-      return ' '
+    return f'loopback recv_msg {s.loopback.recv.msg} loopback send_msg {s.loopback.send.msg}'

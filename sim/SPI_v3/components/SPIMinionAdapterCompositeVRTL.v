@@ -21,7 +21,9 @@ module SPI_v3_components_SPIMinionAdapterCompositeVRTL
   input  logic             recv_val,
   output logic [nbits-3:0] send_msg,
   input  logic             send_rdy,
-  output logic             send_val  
+  output logic             send_val,
+  output logic             minion_parity,
+  output logic             adapter_parity
 );
 
   logic             pull_en;
@@ -53,7 +55,8 @@ module SPI_v3_components_SPIMinionAdapterCompositeVRTL
     .recv_val( recv_val ),
     .send_msg( send_msg ),
     .send_rdy( send_rdy ),
-    .send_val( send_val )
+    .send_val( send_val ),
+    .parity( adapter_parity )
   );
 
   SPI_v3_components_SPIMinionVRTL #(nbits) minion
@@ -67,7 +70,8 @@ module SPI_v3_components_SPIMinionAdapterCompositeVRTL
     .pull_en( pull_en ),
     .pull_msg( pull_msg ),
     .push_en( push_en ),
-    .push_msg( push_msg )
+    .push_msg( push_msg ),
+    .parity( minion_parity )
   );
 
   assign pull_msg[nbits-1]   =  pull_msg_val;

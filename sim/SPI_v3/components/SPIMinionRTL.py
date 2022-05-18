@@ -18,6 +18,7 @@ from os import path
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
 from ..interfaces import PushOutIfc, PullInIfc
+from ..interfaces.SPIIfc import SPIMinionIfc
 
 class SPIMinionVRTL( VerilogPlaceholder, Component ):
 
@@ -27,24 +28,23 @@ class SPIMinionVRTL( VerilogPlaceholder, Component ):
 
     s.set_metadata( VerilogTranslationPass.explicit_module_name, f'SPIMinionRTL_{nbits}nbits' )
 
-    s.cs   = InPort ()
-    s.sclk = InPort ()
-    s.mosi = InPort ()
-    s.miso = OutPort()
+    s.spi_min = SPIMinionIfc()
     s.push = PushOutIfc( nbits )
     s.pull = PullInIfc ( nbits )
+    s.parity = OutPort()
 
     s.set_metadata( VerilogPlaceholderPass.port_map, {
-      s.cs    : 'cs',
-      s.sclk  : 'sclk',
-      s.mosi  : 'mosi',
-      s.miso  : 'miso',
+      s.spi_min.cs    : 'cs',
+      s.spi_min.sclk  : 'sclk',
+      s.spi_min.mosi  : 'mosi',
+      s.spi_min.miso  : 'miso',
 
       s.push.en  : 'push_en',
       s.push.msg : 'push_msg',
 
       s.pull.en  : 'pull_en',
       s.pull.msg : 'pull_msg',
+      s.parity   : 'parity'
     })
 
 # For to force testing a specific RTL language

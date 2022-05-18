@@ -17,41 +17,31 @@ rtl_language = 'pymtl'
 from os import path
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
-from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
-from ..interfaces.SPIIfc import SPIMinionIfc
+from pymtl3.stdlib.stream.ifcs import MinionIfcRTL
 
-class SPIMinionAdapterCompositeVRTL( VerilogPlaceholder, Component ):
+class PacketDisassemblerVRTL( VerilogPlaceholder, Component ):
 
   # Constructor
 
-  def construct( s, nbits=34, num_entries=1 ):
+  def construct( s, nbits_in, nbits_out ):
 
-    s.set_metadata( VerilogTranslationPass.explicit_module_name, f'SPIMinionAdapterCompositeRTL_{nbits}nbits_{num_entries}entries' )
+    s.set_metadata( VerilogTranslationPass.explicit_module_name, f'PacketDisassemblerRTL_{nbits_in}nbits_in_{nbits_out}nbits_out' )
 
-    s.spi_min = SPIMinionIfc()
-    
-    s.recv = RecvIfcRTL( mk_bits(nbits-2))
-    s.send = SendIfcRTL( mk_bits(nbits-2))
+    s.nbits_in = nbits_in
+    s.nbits_out = nbits_out
+    num_regs = (nbits_in//nbits_out) if ((nbits_in % nbits_out) == 0) else (nbits_in//nbits_out + 1)
+    reg_bits = clog2(num_regs)
 
-    s.minion_parity = OutPort()
-    s.adapter_parity = OutPort()
+    s.disassem_ifc = MinionIfcRTL(mk_bits(s.nbits_in), mk_bits(s.nbits_out))
 
     s.set_metadata( VerilogPlaceholderPass.port_map, {
-      s.spi_min.cs    : 'cs',
-      s.spi_min.sclk  : 'sclk',
-      s.spi_min.mosi  : 'mosi',
-      s.spi_min.miso  : 'miso',
+      s.disassem_ifc.req.rdy  : 'req_rdy',
+      s.disassem_ifc.req.val  : 'req_val',
+      s.disassem_ifc.req.msg  : 'req_msg',
+      s.disassem_ifc.resp.rdy : 'resp_rdy',
+      s.disassem_ifc.resp.val : 'resp_val',
+      s.disassem_ifc.resp.msg : 'resp_msg',
 
-      s.recv.val  : 'recv_val',
-      s.recv.rdy  : 'recv_rdy',
-      s.recv.msg  : 'recv_msg',
-
-      s.send.val  : 'send_val',
-      s.send.rdy  : 'send_rdy',
-      s.send.msg  : 'send_msg',
-
-      s.minion_parity  : 'minion_parity',
-      s.adapter_parity : 'adapter_parity'
     })
 
 # For to force testing a specific RTL language
@@ -63,8 +53,8 @@ if hasattr( sys, '_called_from_test' ):
 # Import the appropriate version based on the rtl_language variable
 
 if rtl_language == 'pymtl':
-  from .SPIMinionAdapterCompositePRTL import SPIMinionAdapterCompositePRTL as SPIMinionAdapterCompositeRTL
+  from .PacketDisassemblerPRTL import PacketDisassemblerPRTL as PacketDisassemblerRTL
 elif rtl_language == 'verilog':
-  SPIMinionAdapterCompositeRTL = SPIMinionAdapterCompositeVRTL
+  PacketDisassemblerRTL = PacketDisassemblerVRTL
 else:
   raise Exception("Invalid RTL language!")

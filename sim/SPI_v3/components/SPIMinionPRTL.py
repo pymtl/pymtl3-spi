@@ -4,7 +4,11 @@ SPIMinionPRTL.py
 ==========================================================================
 SPIMinion module. Supports SPI mode 3
 
+<<<<<<< HEAD
 Author : Yanghui Ou
+=======
+Author : Yanghui Ou, Modified by Kyle Infantino
+>>>>>>> c7560d05b108c8e0cfe84bff346ce40c93487785
 '''
 
 from pymtl3 import *
@@ -12,6 +16,7 @@ from .Synchronizer import Synchronizer
 from .ShiftReg import ShiftReg
 
 from ..interfaces import PushOutIfc, PullInIfc
+from ..interfaces.SPIIfc import SPIMinionIfc
 
 class SPIMinionPRTL( Component ):
 
@@ -21,26 +26,22 @@ class SPIMinionPRTL( Component ):
     s.nbits = nbits
 
     # Interface
-    # TODO: SPI interface
-    s.cs   = InPort ()
-    s.sclk = InPort ()
-    s.mosi = InPort ()
-    s.miso = OutPort()
+    s.spi_min = SPIMinionIfc()
 
     s.push = PushOutIfc( s.nbits )
     s.pull = PullInIfc ( s.nbits )
 
-    # Components & Logic
+    s.parity = OutPort()
 
-    # TODO: rename Synchronizer
+    # Components & Logic
     s.cs_sync = Synchronizer(1)
-    s.cs_sync.in_ //= s.cs
+    s.cs_sync.in_ //= s.spi_min.cs
 
     s.sclk_sync = Synchronizer(0)
-    s.sclk_sync.in_ //= s.sclk
+    s.sclk_sync.in_ //= s.spi_min.sclk
 
     s.mosi_sync = Synchronizer(0)
-    s.mosi_sync.in_ //= s.mosi
+    s.mosi_sync.in_ //= s.spi_min.mosi
 
     # Add Comments
     s.shreg_in = m = ShiftReg( s.nbits )
@@ -57,10 +58,13 @@ class SPIMinionPRTL( Component ):
 
     # TODO: register pull/push signal for one cycle?
     # TODO: force pull/push to 0 during reset?
-    s.miso     //= s.shreg_out.out[s.nbits-1]
-    s.pull.en  //= s.cs_sync.negedge_
-    s.push.en  //= s.cs_sync.posedge_
-    s.push.msg //= s.shreg_in.out
+    s.spi_min.miso  //= s.shreg_out.out[s.nbits-1]
+    s.pull.en       //= s.cs_sync.negedge_
+    s.push.en       //= s.cs_sync.posedge_
+    s.push.msg      //= s.shreg_in.out
+
+    s.parity //= lambda: reduce_xor(s.push.msg[0:s.nbits-2]) & s.push.en
+
 
   def line_trace( s ):
 
@@ -69,9 +73,9 @@ class SPIMinionPRTL( Component ):
 
     high = '@'
     low  = '.'
-    cs   = high if s.cs   else low
-    sclk = high if s.sclk else low
+    cs   = high if s.spi_min.cs   else low
+    sclk = high if s.spi_min.sclk else low
 
     in_bit  = f'{s.shreg_in.in_}' if s.shreg_in.shift_en else ' '
 
-    return f'{cs} {sclk}   {s.mosi} {pull_msg} ({in_bit}) {s.miso} {push_msg}'
+    return f'{cs} {sclk}   {s.spi_min.mosi} {pull_msg} ({in_bit}) {s.spi_min.miso} {push_msg}'

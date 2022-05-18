@@ -1,7 +1,7 @@
 //-------------------------------------------------------------------------
 // SPIMinionAdapterVRTL.v
 //-------------------------------------------------------------------------
-`include "SPI_v3/vc/queues.v"
+`include "vc/queues.v"
 
 module SPI_v3_components_SPIMinionAdapterVRTL
 #(
@@ -24,7 +24,8 @@ module SPI_v3_components_SPIMinionAdapterVRTL
   input  logic                    recv_val,
   output logic [nbits-3:0]        send_msg,
   input  logic                    send_rdy,
-  output logic                    send_val  
+  output logic                    send_val,
+  output logic                    parity  
 );
 
   logic open_entries;
@@ -62,6 +63,8 @@ module SPI_v3_components_SPIMinionAdapterVRTL
     .send_rdy( send_rdy ),
     .send_val( send_val )
   );
+
+  assign parity = (^send_msg) & send_val;
   
   always_comb begin : comb_block
     open_entries = mc_q_num_free > 1;
