@@ -21,7 +21,7 @@ from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 from ..interfaces.SPIIfc import SPIMinionIfc
 
 
-class SPIStackVRTL( VerilogPlaceholder, Component ):
+class SPIstackVRTL( VerilogPlaceholder, Component ):
 
   def construct( s, nbits=34, num_entries=1 ):
     s.nbits = nbits
@@ -78,8 +78,8 @@ if hasattr( sys, '_called_from_test' ):
 # Import the appropriate version based on the rtl_language variable
 
 if rtl_language == 'pymtl':
-  from .SPIStackPRTL import SPIStackPRTL as SPIStackRTL
+  from .SPIstackPRTL import SPIstackPRTL as SPIstackRTL
 elif rtl_language == 'verilog':
-  SPIStackRTL = SPIStackVRTL
+  SPIstackRTL = SPIstackVRTL
 else:
   raise Exception("Invalid RTL language!")
