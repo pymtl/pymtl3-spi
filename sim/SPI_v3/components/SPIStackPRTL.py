@@ -18,8 +18,9 @@ from .SPIMinionAdapterCompositePRTL import SPIMinionAdapterCompositePRTL
 from .LoopThroughPRTL import LoopThroughPRTL
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 from ..interfaces.SPIIfc import SPIMinionIfc
+from .Synchronizer import Synchronizer
 
-class SPIStackPRTL( Component ):
+class SPIstackPRTL( Component ):
 
   def construct( s, nbits=34, num_entries=1 ):
     s.nbits = nbits
@@ -42,7 +43,11 @@ class SPIStackPRTL( Component ):
     m.adapter_parity //= s.adapter_parity
 
     s.loopthrough = lt = LoopThroughPRTL(nbits-2)
-    lt.sel //= s.loopthrough_sel
+
+    s.lt_sel_sync = Synchronizer(0)
+    s.lt_sel_sync.in_ //= s.loopthrough_sel
+    lt.sel //= s.lt_sel_sync.out
+
     lt.upstream.req //= m.send # Connect send ifc of minion adapter to upstream recv ifc of loopthrough
     lt.upstream.resp//= m.recv # Connect recv ifc of minion adapter to upstream send ifc of loopthrough
 
@@ -51,7 +56,7 @@ class SPIStackPRTL( Component ):
 
   def line_trace( s ):
         return f"send {s.send.val}|{s.send.rdy}|{s.send.msg}\
-                 recv {s.recv.val}|{s.recv.rdy}|{s.recv.msg}\
-                 lt_sel|{s.loopthrough_sel}\
-                 mp|{s.minion_parity}\
-                 ap|{s.adapter_parity}"
+ recv {s.recv.val}|{s.recv.rdy}|{s.recv.msg}\
+ lt_sel|{s.loopthrough_sel}\
+ mp|{s.minion_parity}\
+ ap|{s.adapter_parity}"

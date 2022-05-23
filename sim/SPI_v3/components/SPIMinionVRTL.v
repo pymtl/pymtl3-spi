@@ -1,7 +1,12 @@
-//==========================================================================
-//SPIMinionVRTL.v
-//==========================================================================
+// ==========================================================================
+// SPIMinionPRTL.py
+// ==========================================================================
 // SPIMinion module. Supports SPI mode 3
+
+// Author : Yanghui Ou, Modified by Kyle Infantino
+
+`ifndef SPI_V3_COMPONENTS_MINION_V
+`define SPI_V3_COMPONENTS_MINION_V
 
 `include "SPI_v3/components/ShiftReg.v"
 `include "SPI_v3/components/Synchronizer.v"
@@ -34,7 +39,7 @@ module SPI_v3_components_SPIMinionVRTL
   logic cs_sync_posedge_;
   logic cs_sync_reset;
 
-  Synchronizer #(1'b1) cs_sync
+  SPI_v3_components_Synchronizer #(1'b1) cs_sync
   (
     .clk( cs_sync_clk ),
     .in_( cs_sync_in_ ),
@@ -55,7 +60,7 @@ module SPI_v3_components_SPIMinionVRTL
   logic mosi_sync_posedge_;
   logic mosi_sync_reset;
 
-  Synchronizer #(1'b0) mosi_sync
+  SPI_v3_components_Synchronizer #(1'b0) mosi_sync
   (
     .clk( mosi_sync_clk ),
     .in_( mosi_sync_in_ ),
@@ -76,7 +81,7 @@ module SPI_v3_components_SPIMinionVRTL
   logic sclk_sync_posedge_;
   logic sclk_sync_reset;
 
-  Synchronizer #(1'b0) sclk_sync
+  SPI_v3_components_Synchronizer #(1'b0) sclk_sync
   (
     .clk( sclk_sync_clk ),
     .in_( sclk_sync_in_ ),
@@ -98,7 +103,7 @@ module SPI_v3_components_SPIMinionVRTL
   logic             shreg_in_reset;
   logic             shreg_in_shift_en;
 
-  ShiftReg #( nbits ) shreg_in
+  SPI_v3_components_ShiftReg #( nbits ) shreg_in
   (
     .clk( shreg_in_clk ),
     .in_( shreg_in_in_ ),
@@ -121,7 +126,7 @@ module SPI_v3_components_SPIMinionVRTL
   logic             shreg_out_reset;
   logic             shreg_out_shift_en;
 
-  ShiftReg #( nbits ) shreg_out
+  SPI_v3_components_ShiftReg #( nbits ) shreg_out
   (
     .clk( shreg_out_clk ),
     .in_( shreg_out_in_ ),
@@ -163,3 +168,5 @@ module SPI_v3_components_SPIMinionVRTL
   assign parity              = (^push_msg[nbits-3:0]) & push_en;
 
 endmodule
+
+`endif /* SPI_V3_COMPONENTS_MINION_V */

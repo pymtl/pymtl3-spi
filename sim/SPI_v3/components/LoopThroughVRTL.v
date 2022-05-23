@@ -11,6 +11,9 @@
 // Author: Dilan Lakhani, Updated by Jack Brzozowski
 //     February 25, 2022
 
+`ifndef SPI_V3_COMPONENTS_LOOPTHROUGH_V
+`define SPI_V3_COMPONENTS_LOOPTHROUGH_V
+
 module SPI_v3_components_LoopThroughVRTL 
 #(
   parameter nbits = 32 // the size of the val/rdy msg
@@ -49,3 +52,5 @@ module SPI_v3_components_LoopThroughVRTL
   assign downstream_resp_rdy= (sel) ? 0 : upstream_resp_rdy;
 
 endmodule
+
+`endif /* SPI_V3_COMPONENTS_LOOPTHROUGH_V */

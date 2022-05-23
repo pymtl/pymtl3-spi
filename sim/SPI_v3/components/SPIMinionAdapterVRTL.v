@@ -1,6 +1,15 @@
-//-------------------------------------------------------------------------
-// SPIMinionAdapterVRTL.v
-//-------------------------------------------------------------------------
+// ==========================================================================
+// SPIMinionAdapterPRTL.py
+// ==========================================================================
+// An Adapter that converts push/pull interface from SPI to val/rdy interfaces. 
+// Support SPI modes 0 and 3
+
+// Author : Kyle Infantino
+// Date : Nov 30, 2021
+
+`ifndef SPI_V3_COMPONENTS_MINION_ADAPTER_V
+`define SPI_V3_COMPONENTS_MINION_ADAPTER_V
+
 `include "vc/queues.v"
 
 module SPI_v3_components_SPIMinionAdapterVRTL
@@ -76,3 +85,5 @@ module SPI_v3_components_SPIMinionAdapterVRTL
   end
 
 endmodule
+
+`endif /* SPI_V3_COMPONENTS_MINION_ADAPTER_V */

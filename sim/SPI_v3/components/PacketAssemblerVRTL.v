@@ -8,6 +8,9 @@
 // PacketAssembler with variable nbits_in and nbits_out. nbits_in <= nbits_out, and we bring data from the input into 
 // separate registers (over multiple cycles), then concatenate the output of each register and send to the output of module.
 
+`ifndef SPI_V3_COMPONENTS_PACKETASSEMBLER_V
+`define SPI_V3_COMPONENTS_PACKETASSEMBLER_V
+
 module SPI_v3_components_PacketAssemblerVRTL
 #(
     parameter nbits_in = 8,
@@ -76,3 +79,5 @@ module SPI_v3_components_PacketAssemblerVRTL
   endgenerate
 
 endmodule
+
+`endif /*  SPI_V3_COMPONENTS_PACKETASSEMBLER_V */

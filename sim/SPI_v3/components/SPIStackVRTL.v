@@ -1,14 +1,21 @@
 // ==========================================================================
-// SPIstackVRTL.py
+// SPIStackPRTL.py
 // ==========================================================================
-// 
-// Author: Jack Brzozowski
-//     May 7, 2022
+// A composition module combining the SPI Minion, SPI Minion Adapter, and Loopthrough
+// This is the standard SPI stack used in the efabless tapeout in 2022.
+
+// Author : Jack Brzozowski
+//   Date : May 7th, 2022
+
+
+`ifndef SPI_V3_COMPONENTS_SPI_STACK_V
+`define SPI_V3_COMPONENTS_SPI_STACK_V
 
 `include "SPI_v3/components/LoopThroughVRTL.v"
 `include "SPI_v3/components/SPIMinionAdapterCompositeVRTL.v"
+`include "SPI_v3/components/Synchronizer.v"
 
-module SPI_v3_components_SPIStackVRTL 
+module SPI_v3_components_SPIstackVRTL 
 #(
     parameter nbits = 34, // the size of the val/rdy msg for the SPI minion
     parameter num_entries = 1
@@ -63,11 +70,23 @@ module SPI_v3_components_SPIStackVRTL
     .send_rdy( minion_out_rdy )
   );
 
+  logic loopthrough_sel_sync_out;
+
+  SPI_v3_components_Synchronizer #(1'b0) lt_sel_sync
+  (
+    .clk( clk ),
+    .in_( loopthrough_sel ),
+    .negedge_(),
+    .out( loopthrough_sel_sync_out ),
+    .posedge_(),
+    .reset( reset )
+  );
+
   SPI_v3_components_LoopThroughVRTL #(nbits-2) loopthrough
   (
     .clk( clk ),
     .reset( reset ),
-    .sel( loopthrough_sel ),
+    .sel( loopthrough_sel_sync_out ),
 
     .upstream_req_val( minion_out_val ), 
     .upstream_req_msg( minion_out_msg ), 
@@ -86,5 +105,6 @@ module SPI_v3_components_SPIStackVRTL
     .downstream_resp_rdy( recv_rdy )
   );
 
-
 endmodule
+
+`endif /* SPI_V3_COMPONENTS_SPI_STACK_V */

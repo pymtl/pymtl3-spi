@@ -5,7 +5,10 @@ ShiftReg.v
 N-bit shift register.
 */
 
-module ShiftReg
+`ifndef SPI_V3_COMPONENTS_SHIFTREG_V
+`define SPI_V3_COMPONENTS_SHIFTREG_V
+
+module SPI_v3_components_ShiftReg
 #(
     parameter nbits = 8
 )
@@ -33,3 +36,5 @@ module ShiftReg
   end
 
 endmodule
+
+`endif /* SPI_V3_COMPONENTS_SHIFTREG_V */
