@@ -34,9 +34,9 @@ class SPITestHarness( object ):
  
     s.dut = DESIGN
     s.dut = config_model_with_cmdline_opts( s.dut, cmdline_opts, [] )
-    # s.dut.apply(DefaultPassGroup(linetrace=True)) #commented out for chip-sim
-    from pymtl3.passes.mamba import Mamba2020
-    s.dut.apply( Mamba2020( print_line_trace=trace ) )
+    s.dut.apply(DefaultPassGroup(linetrace=True)) #commented out for chip-sim
+    # from pymtl3.passes.mamba import Mamba2020
+    # s.dut.apply( Mamba2020( print_line_trace=trace ) )
 
     s.dut.spi_min.cs @= 1
     s.dut.spi_min.sclk @= 0
