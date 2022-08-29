@@ -23,7 +23,7 @@ s = SPIDriver(port)
 # write and read
 for j in range(256):
     s.sel()
-    msg = [0x18, j, j, j, j] # val read no write
+    msg = [0x19, j, j, j, j] # val read no write
     resps = list(s.writeread(msg))
     resps[0] = hex(resps[0])
     s.unsel()
