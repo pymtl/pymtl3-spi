@@ -50,6 +50,8 @@ class ArbitratorPRTL( Component ):
       # change grants_index if the last cycle's grant index is 0 (that component has finished sending its message)
       if ~s.recv[s.old_grants_index].val:
         s.grants_index @= s.encoder_out
+      else:
+        s.grants_index @= s.old_grants_index
         
     @update
     def up_recv_rdy():
