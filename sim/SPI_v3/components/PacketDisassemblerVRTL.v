@@ -27,13 +27,13 @@ module SPI_v3_components_PacketDisassemblerVRTL
   input  logic                  clk,
   input  logic                  reset,
                                  
-  input  logic                  req_val,
-  output logic                  req_rdy,
-  input  logic [nbits_in-1:0]   req_msg,
+  input  logic                  recv_val,
+  output logic                  recv_rdy,
+  input  logic [nbits_in-1:0]   recv_msg,
                                  
-  output logic                  resp_val,
-  input  logic                  resp_rdy,
-  output logic [nbits_out-1:0]  resp_msg
+  output logic                  send_val,
+  input  logic                  send_rdy,
+  output logic [nbits_out-1:0]  send_msg
 );
 
   logic [num_regs-1:0][nbits_out-1:0] regs;
@@ -52,15 +52,15 @@ module SPI_v3_components_PacketDisassemblerVRTL
   );
 
   // Assigns
-  assign req_rdy   = ~transaction_val;
-  assign resp_val  = transaction_val;
+  assign recv_rdy   = ~transaction_val;
+  assign send_val  = transaction_val;
 
   // Counter Update Logic
   always_ff @(posedge clk) begin
-    if (reset | ((counter == (num_regs-1)) & resp_rdy)) begin // if reset or you have sent the last packet
+    if (reset | ((counter == (num_regs-1)) & send_rdy)) begin // if reset or you have sent the last packet
       counter <= 0;
     end
-    else if (resp_val & resp_rdy) begin // if we send a packet
+    else if (send_val & send_rdy) begin // if we send a packet
       counter <= counter + 1;
     end
     else begin
@@ -73,8 +73,8 @@ module SPI_v3_components_PacketDisassemblerVRTL
     if (reset) begin
       transaction_val <= 0;
     end
-    else if ((req_val & req_rdy) | ((counter == (num_regs-1)) & resp_rdy)) begin // if there is an input packet or you have sent the last output packet
-      transaction_val <= req_val & req_rdy; // set transaction val to 1 if it is an input packet
+    else if ((recv_val & recv_rdy) | ((counter == (num_regs-1)) & send_rdy)) begin // if there is an input packet or you have sent the last output packet
+      transaction_val <= recv_val & recv_rdy; // set transaction val to 1 if it is an input packet
     end
     else begin
       transaction_val <= transaction_val;
@@ -89,15 +89,15 @@ module SPI_v3_components_PacketDisassemblerVRTL
       if (i == (num_regs - 1)) begin // this is the top register
         localparam zext_len = 0 ? (nbits_in%nbits_out == 0) : (nbits_out - (nbits_in - (nbits_out*num_regs-nbits_out) )); // value to zero extend to result in an nbits_out long vector;
         always_ff @(posedge clk) begin
-          if (req_val & req_rdy) begin
-            regs[i] <= { {zext_len{1'b0}} , req_msg[ nbits_in-1 : (nbits_out*num_regs-nbits_out) ] }; // holds MSb, zext to fit register size 
+          if (recv_val & recv_rdy) begin
+            regs[i] <= { {zext_len{1'b0}} , recv_msg[ nbits_in-1 : (nbits_out*num_regs-nbits_out) ] }; // holds MSb, zext to fit register size 
           end
         end
       end 
       else begin // not top register
         always_ff @(posedge clk) begin
-          if (req_val & req_rdy) begin
-            regs[i] <= req_msg[ (nbits_out*i + nbits_out -1) : (nbits_out*(i)) ];
+          if (recv_val & recv_rdy) begin
+            regs[i] <= recv_msg[ (nbits_out*i + nbits_out -1) : (nbits_out*(i)) ];
           end
         end 
       end
@@ -106,7 +106,7 @@ module SPI_v3_components_PacketDisassemblerVRTL
       always_comb begin
         reg_mux_in_[i] = regs[i];
         reg_mux_sel = num_regs - counter - 1; //value truncated to reg_bits
-        resp_msg = reg_mux_out;
+        send_msg = reg_mux_out;
       end
     end
   endgenerate
