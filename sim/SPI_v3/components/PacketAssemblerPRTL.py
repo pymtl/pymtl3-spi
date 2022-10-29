@@ -13,7 +13,8 @@ separate registers (over multiple cycles), then concatenate the output of each r
 
 from pymtl3 import *
 from math import ceil
-from pymtl3.stdlib.stream.ifcs import MinionIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL
+from pymtl3.stdlib.stream.ifcs import SendIfcRTL
 
 class PacketAssemblerPRTL( Component ):
 
@@ -26,7 +27,8 @@ class PacketAssemblerPRTL( Component ):
 
     # Interface
 
-    s.assem_ifc = MinionIfcRTL(mk_bits(s.nbits_in), mk_bits(s.nbits_out))
+    s.recv = RecvIfcRTL(mk_bits(s.nbits_in))
+    s.send = SendIfcRTL(mk_bits(s.nbits_out))
 
     # Variables
 
@@ -36,19 +38,19 @@ class PacketAssemblerPRTL( Component ):
 
     # Assigns
 
-    s.assem_ifc.req.rdy   //= lambda: s.counter != s.num_regs
-    s.assem_ifc.resp.val  //= lambda: s.counter == s.num_regs 
-    s.assem_ifc.resp.msg  //= lambda: s.temp_out[0:s.nbits_out]
+    s.recv.rdy   //= lambda: s.counter != s.num_regs
+    s.send.val  //= lambda: s.counter == s.num_regs 
+    s.send.msg  //= lambda: s.temp_out[0:s.nbits_out]
 
     # Counter Update Logic
 
     @update_ff
     def up_counter():
-      if s.reset | (s.assem_ifc.resp.val & s.assem_ifc.resp.rdy): # if reset or you have sent the packet
+      if s.reset | (s.send.val & s.send.rdy): # if reset or you have sent the packet
         s.counter <<= 0
-      elif s.assem_ifc.resp.val & ~s.assem_ifc.resp.rdy: # if response is valid but can't send yet
+      elif s.send.val & ~s.send.rdy: # if response is valid but can't send yet
         s.counter <<= s.counter
-      elif s.assem_ifc.req.val & s.assem_ifc.req.rdy: # if you receive another piece of the packet
+      elif s.recv.val & s.recv.rdy: # if you receive another piece of the packet
         s.counter <<= s.counter + 1
       else:
         s.counter <<= s.counter
@@ -61,7 +63,7 @@ class PacketAssemblerPRTL( Component ):
         if s.reset:
           s.regs[i] <<= 0
         elif s.counter == i:
-          s.regs[i] <<= s.assem_ifc.req.msg
+          s.regs[i] <<= s.recv.msg
         else:
           s.regs[i] <<= s.regs[i]
 
@@ -75,4 +77,4 @@ class PacketAssemblerPRTL( Component ):
       
 
   def line_trace( s ):
-    return f'{s.assem_ifc.req.msg}(){s.assem_ifc.resp.msg}'
+    return f'{s.recv.msg}(){s.send.msg}'

@@ -6,7 +6,7 @@
 # 'verilog' if you are using Verilog for your RTL design (i.e., your
 # design is in IntMulBaseVRTL).
 
-rtl_language = 'pymtl'
+rtl_language = 'verilog'
 
 #-------------------------------------------------------------------------
 # Do not edit below this line
@@ -118,7 +118,7 @@ if hasattr( sys, '_called_from_test' ):
 # Import the appropriate version based on the rtl_language variable
 
 if rtl_language == 'pymtl':
-  from .ArbitratorPRTL import ArbitratorPRTL as ArbitratorRTL
+  from .Arbitrator import Arbitrator as ArbitratorRTL
 elif rtl_language == 'verilog':
   ArbitratorRTL = ArbitratorVRTL
 else:

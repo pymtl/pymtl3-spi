@@ -14,20 +14,20 @@ from ..components.PacketDisassemblerRTL import PacketDisassemblerRTL
 def t( dut, req_val, req_rdy, resp_val, resp_rdy, in_, out):
 
   # Write input value to input port
-  dut.disassem_ifc.req.msg        @= in_
-  dut.disassem_ifc.req.val        @= req_val
-  dut.disassem_ifc.resp.rdy       @= resp_rdy
+  dut.recv.msg        @= in_
+  dut.recv.val        @= req_val
+  dut.send.rdy       @= resp_rdy
 
   dut.sim_eval_combinational()
 
   if req_rdy != '?':
-    assert dut.disassem_ifc.req.rdy == req_rdy
+    assert dut.recv.rdy == req_rdy
   
   if out != '?':
-    assert dut.disassem_ifc.resp.msg == out
+    assert dut.send.msg == out
 
   if resp_val != '?':
-    assert dut.disassem_ifc.resp.val == resp_val
+    assert dut.send.val == resp_val
 
   # Tick simulator one cycle
   dut.sim_tick()
@@ -40,9 +40,9 @@ def test_16x8(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.disassem_ifc.req.msg       @= 0 
-  dut.disassem_ifc.req.val       @= 0
-  dut.disassem_ifc.resp.rdy      @= 0
+  dut.recv.msg       @= 0 
+  dut.recv.val       @= 0
+  dut.send.rdy      @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t(   dut,  1,      1,      0,       1,     0xABCD,  '?' ) # start transaction, fill registers with 16 bits of input
@@ -85,9 +85,9 @@ def test_16x4(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.disassem_ifc.req.msg       @= 0 
-  dut.disassem_ifc.req.val       @= 0
-  dut.disassem_ifc.resp.rdy      @= 0
+  dut.recv.msg       @= 0 
+  dut.recv.val       @= 0
+  dut.send.rdy      @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t(   dut,  1,      1,      0,       1,     0xABCD,  '?' ) # start transaction, fill registers with 16 bits of input
@@ -142,9 +142,9 @@ def test_5x1(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.disassem_ifc.req.msg       @= 0 
-  dut.disassem_ifc.req.val       @= 0
-  dut.disassem_ifc.resp.rdy      @= 0
+  dut.recv.msg       @= 0 
+  dut.recv.val       @= 0
+  dut.send.rdy      @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t(   dut,  1,      1,      0,       1,     0x1F,  '?' ) # start transaction, fill registers with 16 bits of input
@@ -205,9 +205,9 @@ def test_7x3(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.disassem_ifc.req.msg       @= 0 
-  dut.disassem_ifc.req.val       @= 0
-  dut.disassem_ifc.resp.rdy      @= 0
+  dut.recv.msg       @= 0 
+  dut.recv.val       @= 0
+  dut.send.rdy      @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t(   dut,  1,      1,      0,       1,     0x11,    '?' ) # start transaction, fill registers with 7 bits of input
@@ -264,9 +264,9 @@ def test_8x3(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.disassem_ifc.req.msg       @= 0 
-  dut.disassem_ifc.req.val       @= 0
-  dut.disassem_ifc.resp.rdy      @= 0
+  dut.recv.msg       @= 0 
+  dut.recv.val       @= 0
+  dut.send.rdy      @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t(   dut,  1,      1,      0,       1,     0x82,    '?' ) # start transaction, fill registers with 8 bits of input

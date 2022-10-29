@@ -16,7 +16,8 @@ Eg: 16 bit input packet, we want 8 bit output packets.
 
 from pymtl3 import *
 from pymtl3.stdlib.basic_rtl import Mux
-from pymtl3.stdlib.stream.ifcs import MinionIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL
+from pymtl3.stdlib.stream.ifcs import SendIfcRTL
 from math import ceil
 
 class PacketDisassemblerPRTL( Component ):
@@ -30,7 +31,9 @@ class PacketDisassemblerPRTL( Component ):
     s.reg_bits = clog2(s.num_regs)
 
     # Interface
-    s.disassem_ifc = MinionIfcRTL(mk_bits(s.nbits_in), mk_bits(s.nbits_out))
+    
+    s.recv = RecvIfcRTL(mk_bits(s.nbits_in))
+    s.send = SendIfcRTL(mk_bits(s.nbits_out))
 
     # Variables
     s.regs = [ Wire(s.nbits_out) for _ in range(s.num_regs) ]
@@ -43,15 +46,15 @@ class PacketDisassemblerPRTL( Component ):
     s.reg_mux = Mux(s.nbits_out, s.num_regs) # muxes each part of the input packet to the output
 
     # Assigns
-    s.disassem_ifc.req.rdy   //= lambda: (s.transaction_val == 0)
-    s.disassem_ifc.resp.val  //= lambda: (s.transaction_val == 1)
+    s.recv.rdy   //= lambda: (s.transaction_val == 0)
+    s.send.val  //= lambda: (s.transaction_val == 1)
 
     # Counter Update Logic
     @update_ff
     def up_counter():
-      if s.reset | (s.counter == (s.num_regs-1)) & s.disassem_ifc.resp.rdy: # if reset or you have sent the last packet
+      if s.reset | (s.counter == (s.num_regs-1)) & s.send.rdy: # if reset or you have sent the last packet
         s.counter <<= 0
-      elif s.disassem_ifc.resp.val & s.disassem_ifc.resp.rdy: # if we send a packet
+      elif s.send.val & s.send.rdy: # if we send a packet
         s.counter <<= s.counter + 1
       else:
         s.counter <<= s.counter
@@ -61,8 +64,8 @@ class PacketDisassemblerPRTL( Component ):
     def up_transaction_val():
       if s.reset:
         s.transaction_val <<= 0
-      elif (s.disassem_ifc.req.val & s.disassem_ifc.req.rdy) | ((s.counter == (s.num_regs-1)) & s.disassem_ifc.resp.rdy): # if there is an input packet or you have sent the last output packet
-        s.transaction_val <<= s.disassem_ifc.req.val & s.disassem_ifc.req.rdy # set transaction val to 1 if it is an input packet
+      elif (s.recv.val & s.recv.rdy) | ((s.counter == (s.num_regs-1)) & s.send.rdy): # if there is an input packet or you have sent the last output packet
+        s.transaction_val <<= s.recv.val & s.recv.rdy # set transaction val to 1 if it is an input packet
       else:
         s.transaction_val <<= s.transaction_val
 
@@ -70,11 +73,11 @@ class PacketDisassemblerPRTL( Component ):
     @update_ff
     def up_regs():
       for i in range(s.num_regs):
-        if s.disassem_ifc.req.val & s.disassem_ifc.req.rdy: # if valid input packet
+        if s.recv.val & s.recv.rdy: # if valid input packet
           if i == (s.num_regs - 1): # this is the top register
-            s.regs[i] <<= zext(s.disassem_ifc.req.msg[ (s.nbits_out*s.num_regs-s.nbits_out) : s.nbits_in ], s.nbits_out) # holds MSb, zext to fit register size 
+            s.regs[i] <<= zext(s.recv.msg[ (s.nbits_out*s.num_regs-s.nbits_out) : s.nbits_in ], s.nbits_out) # holds MSb, zext to fit register size 
           else:
-            s.regs[i] <<= s.disassem_ifc.req.msg[s.nbits_out*(i) : (s.nbits_out*i + s.nbits_out) ]
+            s.regs[i] <<= s.recv.msg[s.nbits_out*(i) : (s.nbits_out*i + s.nbits_out) ]
 
     # Mux and Output Logic
     @update
@@ -82,8 +85,8 @@ class PacketDisassemblerPRTL( Component ):
       for i in range(s.num_regs):
         s.reg_mux.in_[i] @= s.regs[i]
       s.reg_mux.sel @= trunc(s.num_regs - s.counter - 1, s.reg_bits)
-      s.disassem_ifc.resp.msg @= s.reg_mux.out
+      s.send.msg @= s.reg_mux.out
 
 
   def line_trace( s ):
-    return f'{s.disassem_ifc.req.msg}(){s.disassem_ifc.resp.msg}'
+    return f'{s.recv.msg}(){s.send.msg}'

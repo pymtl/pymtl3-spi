@@ -17,7 +17,8 @@ rtl_language = 'pymtl'
 from os import path
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
-from pymtl3.stdlib.stream.ifcs import MinionIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL
+from pymtl3.stdlib.stream.ifcs import SendIfcRTL
 
 class PacketAssemblerVRTL( VerilogPlaceholder, Component ):
 
@@ -29,15 +30,17 @@ class PacketAssemblerVRTL( VerilogPlaceholder, Component ):
     s.nbits_in = nbits_in
     s.nbits_out = nbits_out
 
-    s.assem_ifc = MinionIfcRTL(mk_bits(s.nbits_in), mk_bits(s.nbits_out))
+    # s.assem_ifc = MinionIfcRTL(mk_bits(s.nbits_in), mk_bits(s.nbits_out))
+    s.recv = RecvIfcRTL(mk_bits(s.nbits_in))
+    s.send = SendIfcRTL(mk_bits(s.nbits_out))
 
     s.set_metadata( VerilogPlaceholderPass.port_map, {
-      s.assem_ifc.req.rdy  : 'req_rdy',
-      s.assem_ifc.req.val  : 'req_val',
-      s.assem_ifc.req.msg  : 'req_msg',
-      s.assem_ifc.resp.rdy : 'resp_rdy',
-      s.assem_ifc.resp.val : 'resp_val',
-      s.assem_ifc.resp.msg : 'resp_msg',
+      s.recv.rdy  : 'recv_rdy',
+      s.recv.val  : 'recv_val',
+      s.recv.msg  : 'recv_msg',
+      s.send.rdy  : 'send_rdy',
+      s.send.val  : 'send_val',
+      s.send.msg  : 'send_msg',
 
     })
 

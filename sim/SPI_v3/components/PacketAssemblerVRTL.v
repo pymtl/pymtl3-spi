@@ -21,32 +21,32 @@ module SPI_v3_components_PacketAssemblerVRTL
     input  logic                  clk,
     input  logic                  reset,
                                  
-    input  logic                  req_val,
-    output logic                  req_rdy,
-    input  logic [nbits_in-1:0]   req_msg,
+    input  logic                  recv_val,
+    output logic                  recv_rdy,
+    input  logic [nbits_in-1:0]   recv_msg,
                                  
-    output logic                  resp_val,
-    input  logic                  resp_rdy,
-    output logic [nbits_out-1:0]  resp_msg
+    output logic                  send_val,
+    input  logic                  send_rdy,
+    output logic [nbits_out-1:0]  send_msg
 );
 
   logic [num_regs-1:0][nbits_in-1:0] regs;
   logic [$clog2(num_regs):0]         counter; // the +1 is because we count up to num_regs e.g. if num_regs=2 then counter must go from 0->1->2
   logic [(nbits_in*num_regs)-1:0]    temp_out; // bigger than out, holds the concatenated reg[i].out values
 
-  assign req_rdy  = counter != num_regs;
-  assign resp_val = counter == num_regs;
-  assign resp_msg = temp_out[nbits_out-1:0];
+  assign recv_rdy  = counter != num_regs;
+  assign send_val = counter == num_regs;
+  assign send_msg = temp_out[nbits_out-1:0];
 
 
   always_ff @(posedge clk) begin
-    if (reset | (resp_val & resp_rdy)) begin // if reset or you have sent the packet
+    if (reset | (send_val & send_rdy)) begin // if reset or you have sent the packet
       counter <= 0;
     end
-    else if (resp_val & ~resp_rdy) begin // if response is valid but can't send yet
+    else if (send_val & ~send_rdy) begin // if response is valid but can't send yet
       counter <= counter;
     end
-    else if (req_val & req_rdy) begin // if you receive another piece of the packet
+    else if (recv_val & recv_rdy) begin // if you receive another piece of the packet
       counter <= counter + 1;
     end
     else begin
@@ -63,7 +63,7 @@ module SPI_v3_components_PacketAssemblerVRTL
           regs[i] <= 0;
         end
         else if (counter == i) begin
-          regs[i] <= req_msg;
+          regs[i] <= recv_msg;
         end
         else begin
           regs[i] <= regs[i];
@@ -71,7 +71,7 @@ module SPI_v3_components_PacketAssemblerVRTL
       end
 
       always_comb begin
-        // Need to put the first req_msg into the upper bits of the output because we write the most-significant part of the packet first
+        // Need to put the first recv_msg into the upper bits of the output because we write the most-significant part of the packet first
         temp_out[(nbits_in*(num_regs-1-i) + nbits_in - 1) : (nbits_in*(num_regs-1-i))] = regs[i];
       end
 
