@@ -52,7 +52,7 @@ class ArbitratorPRTL( Component ):
       if ~s.recv[s.old_grants_index].val:
         s.grants_index @= s.encoder_out
       else:
-        s.grants_index @= s.old_grants_index
+        s.grants_index @= s.grants_index
         
     @update
     def up_recv_rdy():

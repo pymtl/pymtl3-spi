@@ -17,7 +17,8 @@ rtl_language = 'pymtl'
 from os import path
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
-from pymtl3.stdlib.stream.ifcs import MinionIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL
+from pymtl3.stdlib.stream.ifcs import SendIfcRTL
 
 class PacketSerDesVRTL( VerilogPlaceholder, Component ):
 
@@ -30,15 +31,16 @@ class PacketSerDesVRTL( VerilogPlaceholder, Component ):
     s.nbits_in = nbits_in
     s.nbits_out = nbits_out
 
-    s.serdes_ifc = MinionIfcRTL(mk_bits(s.nbits_in), mk_bits(s.nbits_out))
+    s.serdes_recv = RecvIfcRTL(mk_bits(s.nbits_in))
+    s.serdes_send = SendIfcRTL(mk_bits(s.nbits_out))
 
     s.set_metadata( VerilogPlaceholderPass.port_map, {
-      s.serdes_ifc.req.rdy  : 'req_rdy',
-      s.serdes_ifc.req.val  : 'req_val',
-      s.serdes_ifc.req.msg  : 'req_msg',
-      s.serdes_ifc.resp.rdy : 'resp_rdy',
-      s.serdes_ifc.resp.val : 'resp_val',
-      s.serdes_ifc.resp.msg : 'resp_msg',
+      s.serdes_recv.rdy  : 'recv_rdy',
+      s.serdes_recv.val  : 'recv_val',
+      s.serdes_recv.msg  : 'recv_msg',
+      s.serdes_send.rdy : 'send_rdy',
+      s.serdes_send.val : 'send_val',
+      s.serdes_send.msg : 'send_msg',
     })
 
 # For to force testing a specific RTL language

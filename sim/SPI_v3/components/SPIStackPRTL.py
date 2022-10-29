@@ -17,7 +17,7 @@ from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 from ..interfaces.SPIIfc import SPIMinionIfc
 from .Synchronizer import Synchronizer
 
-class SPIstackPRTL( Component ):
+class SPIStackPRTL( Component ):
 
   def construct( s, nbits=34, num_entries=1 ):
     s.nbits = nbits

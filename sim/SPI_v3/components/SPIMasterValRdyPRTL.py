@@ -28,7 +28,7 @@ class SPIMasterValRdyPRTL( Component ):
     s.logBitsN = mk_bits(clog2(nbits)+1) # number of bits required to count to packet size
 
     # Interface
-    s.spi_mas = SPIMasterIfc( ncs )
+    s.spi_ifc = SPIMasterIfc( ncs )
 
     s.send = SendIfcRTL( mk_bits(s.nbits) )
     s.recv = RecvIfcRTL( mk_bits(s.nbits) )
@@ -103,11 +103,11 @@ class SPIMasterValRdyPRTL( Component ):
     def up_stateOutputs():
       s.recv.rdy            @= 0 
       s.send.val            @= 0 
-      s.spi_mas.sclk        @= 0
+      s.spi_ifc.sclk        @= 0
       s.packet_size_reg.en  @= 0
       s.cs_addr_reg.en      @= 0
       for i in range(ncs):
-        s.cs[i]             @= 1
+        s.spi_ifc.cs[i]             @= 1
       s.sclk_negedge        @= 0
       s.sclk_posedge        @= 0
       s.sclk_counter_en     @= 0
@@ -124,20 +124,20 @@ class SPIMasterValRdyPRTL( Component ):
       # STATE: START0
       #-------------------------------------------------------------------    
       elif s.state == s.STATE_START0: #start
-        s.cs[s.cs_addr_reg.out] @= 0
+        s.spi_ifc.cs[s.cs_addr_reg.out] @= 0
         s.shreg_out_rst         @= 1
       #-------------------------------------------------------------------
       # STATE: START1
       #------------------------------------------------------------------- 
       elif s.state == s.STATE_START1: #start
         s.sclk_posedge @= 1
-        s.cs[s.cs_addr_reg.out] @= 0
+        s.spi_ifc.cs[s.cs_addr_reg.out] @= 0
       #-------------------------------------------------------------------
       # STATE: SCLK_HIGH
       #------------------------------------------------------------------- 
       elif s.state == s.STATE_SCLK_HIGH:
-        s.cs[s.cs_addr_reg.out] @= 0
-        s.sclk @= 1
+        s.spi_ifc.cs[s.cs_addr_reg.out] @= 0
+        s.spi_ifc.sclk @= 1
         s.sclk_negedge @= 1
         s.sclk_counter_en @= 1
       #-------------------------------------------------------------------
@@ -147,12 +147,12 @@ class SPIMasterValRdyPRTL( Component ):
         if s.sclk_counter == 0: s.sclk_posedge @= 0 # will not go high again if all bits were already read
         else:                   s.sclk_posedge @= 1
 
-        s.cs[s.cs_addr_reg.out] @= 0
+        s.spi_ifc.cs[s.cs_addr_reg.out] @= 0
       #-------------------------------------------------------------------
       # STATE: CS_LOW_WAIT
       #------------------------------------------------------------------- 
       elif s.state == s.STATE_CS_LOW_WAIT:
-        s.cs[s.cs_addr_reg.out] @= 0
+        s.spi_ifc.cs[s.cs_addr_reg.out] @= 0
       #-------------------------------------------------------------------
       # STATE: DONE
       #------------------------------------------------------------------- 
@@ -171,7 +171,7 @@ class SPIMasterValRdyPRTL( Component ):
 
     # Datapath
     s.shreg_in = m = ShiftRegExtRst( s.nbits )
-    m.in_       //= s.miso
+    m.in_       //= s.spi_ifc.miso
     m.shift_en  //= s.sclk_posedge 
     m.load_en   //= 0
     m.load_data //= 0
@@ -183,8 +183,8 @@ class SPIMasterValRdyPRTL( Component ):
     m.load_en   //= lambda: s.recv.rdy & s.recv.val
     m.load_data //= lambda: s.recv.msg << zext(((s.nbits-s.packet_size_reg.out)), s.nbits) # put message into most significant bits
 
-    s.mosi     //= s.shreg_out.out[nbits-1]
+    s.spi_ifc.mosi     //= s.shreg_out.out[nbits-1]
     s.send.msg //= s.shreg_in.out
 
   def line_trace( s ):
-    return f'mosi{s.mosi}|miso{s.miso}|sclk{s.sclk}[cs{s.cs[0]}]st{s.state}|rcv{s.recv.val}|rcd{s.recv.rdy}'
+    return f'mosi{s.spi_ifc.mosi}|miso{s.spi_ifc.miso}|sclk{s.spi_ifc.sclk}[cs{s.spi_ifc.cs[0]}]st{s.state}|rcv{s.recv.val}|rcd{s.recv.rdy}'

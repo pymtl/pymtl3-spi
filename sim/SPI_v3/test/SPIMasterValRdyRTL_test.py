@@ -26,7 +26,7 @@ def t( dut, cs_addr, packet_size, recv, send, cs, sclk, mosi, miso ):
   dut.recv.val             @= recv[0]
   dut.recv.msg             @= recv[2]
   dut.send.rdy             @= send[1]
-  dut.miso                 @= miso
+  dut.spi_ifc.miso         @= miso
 
 
   dut.sim_eval_combinational()
@@ -40,13 +40,13 @@ def t( dut, cs_addr, packet_size, recv, send, cs, sclk, mosi, miso ):
     assert dut.send.msg == send[2]
 
   if sclk != '?':
-    assert dut.sclk == sclk
+    assert dut.spi_ifc.sclk == sclk
 
   if mosi != '?':
-    assert dut.mosi == mosi
+    assert dut.spi_ifc.mosi == mosi
 
   for i in range(len(cs)):
-    assert dut.cs[i]  == cs[i]
+    assert dut.spi_ifc.cs[i]  == cs[i]
 
   # Tick simulator one cycle
   dut.sim_tick()
@@ -59,7 +59,7 @@ def reset( dut ):
   dut.recv.val             @= 0
   dut.recv.msg             @= 0
   dut.send.rdy             @= 0
-  dut.miso                 @= 0
+  dut.spi_ifc.miso         @= 0
   dut.sim_reset()
 
 def test_basic (cmdline_opts ): # basic test

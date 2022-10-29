@@ -11,23 +11,23 @@ from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
 from ..components.PacketSerDesRTL import PacketSerDesRTL
 
 # Helper function
-def t( dut, req_val, req_rdy, resp_val, resp_rdy, in_, out):
+def t( dut, recv_val, recv_rdy, send_val, send_rdy, in_, out):
 
   # Write input value to input port
-  dut.serdes_ifc.req.msg        @= in_
-  dut.serdes_ifc.req.val        @= req_val
-  dut.serdes_ifc.resp.rdy       @= resp_rdy
+  dut.serdes_recv.msg        @= in_
+  dut.serdes_recv.val        @= recv_val
+  dut.serdes_send.rdy        @= send_rdy
 
   dut.sim_eval_combinational()
 
-  if req_rdy != '?':
-    assert dut.serdes_ifc.req.rdy == req_rdy
+  if recv_rdy != '?':
+    assert dut.serdes_recv.rdy == recv_rdy
   
   if out != '?':
-    assert dut.serdes_ifc.resp.msg == out
+    assert dut.serdes_send.msg == out
 
-  if resp_val != '?':
-    assert dut.serdes_ifc.resp.val == resp_val
+  if send_val != '?':
+    assert dut.serdes_send.val == send_val
 
   # Tick simulator one cycle
   dut.sim_tick()
@@ -41,9 +41,9 @@ def test_8x16(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.serdes_ifc.req.msg       @= 0 
-  dut.serdes_ifc.req.val       @= 0
-  dut.serdes_ifc.resp.rdy      @= 0
+  dut.serdes_recv.msg       @= 0 
+  dut.serdes_recv.val       @= 0
+  dut.serdes_send.rdy       @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t(   dut,  1,      1,      0,       1,     0xAA,    '?' ) # start transactiojn
@@ -84,9 +84,9 @@ def test_8x32(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.serdes_ifc.req.msg       @= 0 
-  dut.serdes_ifc.req.val       @= 0
-  dut.serdes_ifc.resp.rdy      @= 0
+  dut.serdes_recv.msg       @= 0 
+  dut.serdes_recv.val       @= 0
+  dut.serdes_send.rdy       @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t( dut,    1,      1,      0,       1,     0xAA,    '?' ) # start transactiojn
@@ -125,9 +125,9 @@ def test_7x25(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.serdes_ifc.req.msg       @= 0 
-  dut.serdes_ifc.req.val       @= 0
-  dut.serdes_ifc.resp.rdy      @= 0
+  dut.serdes_recv.msg       @= 0 
+  dut.serdes_recv.val       @= 0
+  dut.serdes_send.rdy       @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t( dut,    1,      1,      0,       1,     0x01,    '?' ) # start transactiojn
@@ -145,9 +145,9 @@ def test_3x7(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.serdes_ifc.req.msg       @= 0 
-  dut.serdes_ifc.req.val       @= 0
-  dut.serdes_ifc.resp.rdy      @= 0
+  dut.serdes_recv.msg       @= 0 
+  dut.serdes_recv.val       @= 0
+  dut.serdes_send.rdy       @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t( dut,    1,      1,      0,       1,     0x1,    '?' ) # start transactiojn
@@ -187,9 +187,9 @@ def test_7x7(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.serdes_ifc.req.msg       @= 0 
-  dut.serdes_ifc.req.val       @= 0
-  dut.serdes_ifc.resp.rdy      @= 0
+  dut.serdes_recv.msg       @= 0 
+  dut.serdes_recv.val       @= 0
+  dut.serdes_send.rdy       @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t( dut,    1,      1,      0,       1,     0x08,    '?' ) # start transactiojn
@@ -209,9 +209,9 @@ def test_1x4(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.serdes_ifc.req.msg       @= 0 
-  dut.serdes_ifc.req.val       @= 0
-  dut.serdes_ifc.resp.rdy      @= 0
+  dut.serdes_recv.msg       @= 0 
+  dut.serdes_recv.val       @= 0
+  dut.serdes_send.rdy       @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t( dut,    1,      1,      0,       1,     0x1,    '?' ) # start transactiojn
@@ -263,9 +263,9 @@ def test_16x8(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.serdes_ifc.req.msg       @= 0 
-  dut.serdes_ifc.req.val       @= 0
-  dut.serdes_ifc.resp.rdy      @= 0
+  dut.serdes_recv.msg       @= 0 
+  dut.serdes_recv.val       @= 0
+  dut.serdes_send.rdy       @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t(   dut,  1,      1,      0,       1,     0xABCD,  '?' ) # start transaction, fill registers with 16 bits of input
@@ -308,9 +308,9 @@ def test_16x4(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.serdes_ifc.req.msg       @= 0 
-  dut.serdes_ifc.req.val       @= 0
-  dut.serdes_ifc.resp.rdy      @= 0
+  dut.serdes_recv.msg       @= 0 
+  dut.serdes_recv.val       @= 0
+  dut.serdes_send.rdy       @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t(   dut,  1,      1,      0,       1,     0xABCD,  '?' ) # start transaction, fill registers with 16 bits of input
@@ -365,9 +365,9 @@ def test_5x1(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.serdes_ifc.req.msg       @= 0 
-  dut.serdes_ifc.req.val       @= 0
-  dut.serdes_ifc.resp.rdy      @= 0
+  dut.serdes_recv.msg       @= 0 
+  dut.serdes_recv.val       @= 0
+  dut.serdes_send.rdy       @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t(   dut,  1,      1,      0,       1,     0x1F,  '?' ) # start transaction, fill registers with 16 bits of input
@@ -428,9 +428,9 @@ def test_7x3(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.serdes_ifc.req.msg       @= 0 
-  dut.serdes_ifc.req.val       @= 0
-  dut.serdes_ifc.resp.rdy      @= 0
+  dut.serdes_recv.msg       @= 0 
+  dut.serdes_recv.val       @= 0
+  dut.serdes_send.rdy       @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t(   dut,  1,      1,      0,       1,     0x11,    '?' ) # start transaction, fill registers with 7 bits of input
@@ -487,9 +487,9 @@ def test_8x3(cmdline_opts):
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 
-  dut.serdes_ifc.req.msg       @= 0 
-  dut.serdes_ifc.req.val       @= 0
-  dut.serdes_ifc.resp.rdy      @= 0
+  dut.serdes_recv.msg       @= 0 
+  dut.serdes_recv.val       @= 0
+  dut.serdes_send.rdy       @= 0
   dut.sim_reset()
   #       req_val req_rdy resp_val resp_rdy   in_     out
   t(   dut,  1,      1,      0,       1,     0x82,    '?' ) # start transaction, fill registers with 8 bits of input

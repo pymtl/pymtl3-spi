@@ -1,5 +1,5 @@
 // ==========================================================================
-// PacketDisassemblerVRTL.py
+// PacketDisassemblerVRTL.v
 // ==========================================================================
 // PacketDisassembler with variable nbits_in and nbits_out. 
 // Input: one big packet of size nbits_in Output: small packets of size nbits_out.
@@ -52,15 +52,10 @@ module SPI_v3_components_PacketDisassemblerVRTL
   );
 
   // Assigns
-<<<<<<< HEAD
-  assign req_rdy     = ~transaction_val;
-  assign resp_val    = transaction_val;
+  assign recv_rdy     = ~transaction_val;
+  assign send_val    = transaction_val;
   assign reg_mux_sel = num_regs - counter - 1; //value truncated to reg_bits
-  assign resp_msg    = reg_mux_out;
-=======
-  assign recv_rdy   = ~transaction_val;
-  assign send_val  = transaction_val;
->>>>>>> 808067e7957b3d3a8893d37112e9075eebf3bc8a
+  assign send_msg    = reg_mux_out;
 
   // Counter Update Logic
   always_ff @(posedge clk) begin
@@ -112,11 +107,6 @@ module SPI_v3_components_PacketDisassemblerVRTL
       // Mux and Output Logic
       always_comb begin
         reg_mux_in_[i] = regs[i];
-<<<<<<< HEAD
-=======
-        reg_mux_sel = num_regs - counter - 1; //value truncated to reg_bits
-        send_msg = reg_mux_out;
->>>>>>> 808067e7957b3d3a8893d37112e9075eebf3bc8a
       end
     end
   endgenerate
