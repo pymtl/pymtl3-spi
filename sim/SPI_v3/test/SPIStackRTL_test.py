@@ -8,7 +8,7 @@ Unit test for SPIStack.
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
 
-from ..components.SPIstackRTL import SPIstackRTL
+from ..components.SPIStackRTL import SPIstackRTL
 
 def test_basic( cmdline_opts ):
 

@@ -11,9 +11,6 @@ Author : Jack Brzozowski
 '''
 from pymtl3 import *
 
-from ..interfaces import PushOutIfc, PullInIfc
-from ..interfaces.SPIIfc import SPIMinionIfc
-
 from .SPIMinionAdapterCompositePRTL import SPIMinionAdapterCompositePRTL
 from .LoopThroughPRTL import LoopThroughPRTL
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
@@ -55,8 +52,5 @@ class SPIstackPRTL( Component ):
     lt.downstream.resp//=s.recv # Input from the design block connecting to the SPI stack
 
   def line_trace( s ):
-        return f"send {s.send.val}|{s.send.rdy}|{s.send.msg}\
- recv {s.recv.val}|{s.recv.rdy}|{s.recv.msg}\
- lt_sel|{s.loopthrough_sel}\
- mp|{s.minion_parity}\
- ap|{s.adapter_parity}"
+    return f"send {s.send.val}|{s.send.rdy}|{s.send.msg} recv {s.recv.val}|{s.recv.rdy}|{s.recv.msg}\
+            lt_sel|{s.loopthrough_sel} mp|{s.minion_parity} ap|{s.adapter_parity}"

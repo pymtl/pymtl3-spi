@@ -17,20 +17,23 @@ rtl_language = 'pymtl'
 from os import path
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
-from ..interfaces import PushInIfc, PullOutIfc
+from ..interfaces.SPIIfc import SPIMinionIfc
 
 class SPILoopBackCompositeVRTL( VerilogPlaceholder, Component ):
 
   # Constructor
 
-  def construct( s, nbits=34, ncs=1 ):
+  def construct( s, nbits=32 ):
 
-    s.set_metadata( VerilogTranslationPass.explicit_module_name, f'SPILoopBackCompositeRTL_{nbits}nbits_{ncs}ncs' )
+    #Local parameters
 
-    # s.cs   = InPort ()
-    # s.sclk = InPort ()
-    # s.mosi = InPort ()
-    # s.miso = OutPort()
+    s.nbits = nbits  # size of SPI packet including 2 bit flow control
+
+    #Interface
+
+    s.spi_min = SPIMinionIfc()
+    s.minion_parity = OutPort()
+    s.adapter_parity = OutPort()
     
     # s.recv = RecvIfcRTL( mk_bits(nbits-2))
     # s.send = SendIfcRTL( mk_bits(nbits-2))

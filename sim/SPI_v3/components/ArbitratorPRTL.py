@@ -4,7 +4,7 @@ ArbitratorPRTL.py
 ==========================================================================
 This module is used to pick which component gets to output to the val/rdy SPI wrapper if multiple components can send a valid message.
 The arbitrator puts an address header on the outgoing packet so that downstream components can tell which component sent the response
-The nbits parameter is the length of the message.
+The nbits parameter is the length of the message received by the arbitrator.
 The num_inputs parameter is the number of input components that the Arbitrator is selecting from. MUST be >= 2
 
 Author : Dilan Lakhani
@@ -21,6 +21,7 @@ def mk_arb_msg(addr_nbits, data_nbits):
     addr: mk_bits(addr_nbits)
     data: mk_bits(data_nbits)
   return ArbitratorMsg
+
 
 class ArbitratorPRTL( Component ):
 
@@ -41,15 +42,17 @@ class ArbitratorPRTL( Component ):
     s.encoder_out = Wire(s.addr_nbits)
 
     # Assigns
-    s.send.val    //= lambda: s.recv[s.grants_index].val & s.recv[s.grants_index].rdy # valid response if there is a valid request from the granted PacketDisassembler
-    s.send.msg.data    //= lambda: s.recv[s.grants_index].msg
-    s.send.msg.addr    //= lambda: s.grants_index
+    s.send.val       //= lambda: s.recv[s.grants_index].val & s.recv[s.grants_index].rdy # valid response if there is a valid request from the granted PacketDisassembler
+    s.send.msg.data  //= lambda: s.recv[s.grants_index].msg
+    s.send.msg.addr  //= lambda: s.grants_index
 
     @update
     def up_grants_index():
       # change grants_index if the last cycle's grant index is 0 (that component has finished sending its message)
       if ~s.recv[s.old_grants_index].val:
         s.grants_index @= s.encoder_out
+      else:
+        s.grants_index @= s.old_grants_index
         
     @update
     def up_recv_rdy():

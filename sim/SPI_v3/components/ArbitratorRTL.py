@@ -2,7 +2,7 @@
 # Choose PyMTL or Verilog version
 #=========================================================================
 # Set this variable to 'pymtl' if you are using PyMTL for your RTL design
-# (i.e., your design is in IntMulBasePRTL) or set this variable to
+# (i.e., your design is in IntMultBasePRTL) or set this variable to
 # 'verilog' if you are using Verilog for your RTL design (i.e., your
 # design is in IntMulBaseVRTL).
 
@@ -17,50 +17,98 @@ rtl_language = 'pymtl'
 from os import path
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
-# from pymtl3.stdlib.stream.ifcs import MinionIfcRTL, MasterIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 
+def mk_arb_msg(addr_nbits, data_nbits):
+  @bitstruct
+  class ArbitratorMsg:
+    addr: mk_bits(addr_nbits)
+    data: mk_bits(data_nbits)
+  return ArbitratorMsg
 
 class ArbitratorVRTL( VerilogPlaceholder, Component ):
-    
-  def construct( s, nbits=32):
 
-    # Local Parameters
+  # Constructor
+
+  def construct( s, nbits, num_inputs ):
+
+    s.set_metadata( VerilogTranslationPass.explicit_module_name, f'ArbitratorRTL_{nbits}nbits_{num_inputs}num_inputs' )
+
     s.nbits = nbits
+    s.num_inputs = num_inputs
+    addr_nbits = clog2(num_inputs)
 
-#     # Ports
+    # interface
+    s.recv = [ RecvIfcRTL(mk_bits(s.nbits)) for _ in range(s.num_inputs) ]
+    s.send = SendIfcRTL(mk_arb_msg(addr_nbits, s.nbits))
 
-#     s.sel = InPort() # select bit, if 1 then loopback, if 0 pass through
+    s.recv_val_wires = [ Wire() for _ in range(s.num_inputs) ]
+    s.recv_rdy_wires = [ Wire() for _ in range(s.num_inputs) ]
+    s.recv_msg_wires = [ Wire(s.nbits) for _ in range(s.num_inputs) ]
+    for i in range(num_inputs):
+      s.recv_val_wires[i] = s.recv[i].val
+      s.recv_rdy_wires[i] = s.recv[i].rdy
+      s.recv_msg_wires[i] = s.recv[i].msg
 
-#     # Upstream   req  (Recv Ifc): Input from the upstream Send ifc (can be looped back or passed to the downstream block)
-#     # Upstream   resp (Send Ifc): Output to the upstream Recv ifc (can be looped back or passed in from the downstream block)
-#     # Downstream req  (Send Ifc): Output to the downstream Recv ifc (0 if loopback is selected) 
-#     # Downstream resp (Recv Ifc): Input from the downstream Send ifc (Not used if loopback is selected)
 
-#     s.upstream   = MinionIfcRTL( mk_bits(s.nbits), mk_bits(s.nbits) ) 
-#     s.downstream = MasterIfcRTL( mk_bits(s.nbits), mk_bits(s.nbits) )
+    s.recv_val = Wire(s.num_inputs)
+    s.recv_rdy = Wire(s.num_inputs)
+    s.recv_msg = Wire(s.num_inputs*s.nbits)
 
-#     s.set_metadata( VerilogPlaceholderPass.params, { 'nbits' : nbits } )
-#     s.set_metadata( VerilogPlaceholderPass.port_map, {
-#       s.sel                 : 'sel',
+    # for i in range(num_inputs):
+    #   s.recv_val[i] //= s.recv_val_wires[i]
+    print(type(s.recv_val_wires[1]))
+    s.recv_val = concat(s.recv_val_wires[1], s.recv_val_wires[0])
+    i = 2
+    while i < num_inputs:
+      s.recv_val = concat(s.recv_val_wires[i], s.recv_val)
+    #     # s.recv_rdy_concat = concat(s.recv[i+1].rdy, s.recv_rdy_concat)
+    #     # s.recv_msg_concat = concat(s.recv[i+1].msg, s.recv_msg_concat)
+    #     s.recv_val[i] //= s.recv[i].val
+    #     s.recv_rdy[i] //= s.recv[i].rdy
+    #     s.recv_msg[i:((i+1)*nbits)] //= s.recv[i].msg
+    #   i+=1
 
-#       s.upstream.req.val    : 'upstream_req_val',
-#       s.upstream.req.msg    : 'upstream_req_msg',
-#       s.upstream.req.rdy    : 'upstream_req_rdy',
+    # s.set_metadata( VerilogPlaceholderPass.port_map, {
+    #   s.recv.rdy  : 'req_rdy',
+    #   s.recv.val  : 'req_val',
+    #   s.recv.msg  : 'req_msg',
+    #   s.send.rdy : 'resp_rdy',
+    #   s.send.val : 'resp_val',
+    #   s.send.msg : 'resp_msg',
+    # })
 
-#       s.upstream.resp.val   : 'upstream_resp_val',
-#       s.upstream.resp.msg   : 'upstream_resp_msg',
-#       s.upstream.resp.rdy   : 'upstream_resp_rdy',
+    # for i in range(num_inputs):
+    #     s.set_metadata( VerilogPlaceholderPass.port_map, {
+    #     s.recv[i].rdy  : f'req_rdy[{i}]',
+    #     s.recv[i].val  : f'req_val[{i}]',
+    #     s.recv[i].msg  : f'req_msg[{i}]',
+    #     s.send.rdy : 'resp_rdy',
+    #     s.send.val : 'resp_val',
+    #     s.send.msg : 'resp_msg',
+    #     })
 
-#       s.downstream.req.val  : 'downstream_req_val',
-#       s.downstream.req.msg  : 'downstream_req_msg',
-#       s.downstream.req.rdy  : 'downstream_req_rdy',
+    # s.set_metadata( VerilogPlaceholderPass.port_map, {
+    # s.recv[0].rdy  : 'req_rdy[0]',
+    # s.recv[0].val  : 'req_val[0]',
+    # s.recv[0].msg  : 'req_msg[0]',
+    # s.recv[1].rdy  : 'req_rdy[1]',
+    # s.recv[1].val  : 'req_val[1]',
+    # s.recv[1].msg  : 'req_msg[1]',
+    # s.send.rdy : 'resp_rdy',
+    # s.send.val : 'resp_val',
+    # s.send.msg : 'resp_msg',
+    # })
 
-#       s.downstream.resp.val : 'downstream_resp_val',
-#       s.downstream.resp.msg : 'downstream_resp_msg',
-#       s.downstream.resp.rdy : 'downstream_resp_rdy',
-#     })
+    # s.set_metadata( VerilogPlaceholderPass.port_map, {
+    # s.recv_val_concat  : 'req_val',
+    # s.recv_rdy_concat  : 'req_rdy',
+    # s.recv_msg_concat  : 'req_msg',
+    # s.send.rdy : 'resp_rdy',
+    # s.send.val : 'resp_val',
+    # s.send.msg : 'resp_msg',
+    # })
 
-        
 # For to force testing a specific RTL language
 import sys
 if hasattr( sys, '_called_from_test' ):

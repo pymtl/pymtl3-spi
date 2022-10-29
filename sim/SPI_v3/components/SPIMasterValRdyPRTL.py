@@ -15,6 +15,7 @@ from .ShiftReg import ShiftReg, ShiftRegExtRst
 
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 from pymtl3.stdlib.basic_rtl.registers import RegEnRst
+from ..interfaces.SPIIfc import SPIMasterIfc
 
 
 class SPIMasterValRdyPRTL( Component ):
@@ -27,10 +28,7 @@ class SPIMasterValRdyPRTL( Component ):
     s.logBitsN = mk_bits(clog2(nbits)+1) # number of bits required to count to packet size
 
     # Interface
-    s.cs   = [ OutPort() for _ in range(ncs) ] 
-    s.sclk = OutPort()
-    s.mosi = OutPort()
-    s.miso = InPort()
+    s.spi_mas = SPIMasterIfc( ncs )
 
     s.send = SendIfcRTL( mk_bits(s.nbits) )
     s.recv = RecvIfcRTL( mk_bits(s.nbits) )
@@ -105,7 +103,7 @@ class SPIMasterValRdyPRTL( Component ):
     def up_stateOutputs():
       s.recv.rdy            @= 0 
       s.send.val            @= 0 
-      s.sclk                @= 0
+      s.spi_mas.sclk        @= 0
       s.packet_size_reg.en  @= 0
       s.cs_addr_reg.en      @= 0
       for i in range(ncs):

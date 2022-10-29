@@ -52,8 +52,10 @@ module SPI_v3_components_PacketDisassemblerVRTL
   );
 
   // Assigns
-  assign req_rdy   = ~transaction_val;
-  assign resp_val  = transaction_val;
+  assign req_rdy     = ~transaction_val;
+  assign resp_val    = transaction_val;
+  assign reg_mux_sel = num_regs - counter - 1; //value truncated to reg_bits
+  assign resp_msg    = reg_mux_out;
 
   // Counter Update Logic
   always_ff @(posedge clk) begin
@@ -105,8 +107,6 @@ module SPI_v3_components_PacketDisassemblerVRTL
       // Mux and Output Logic
       always_comb begin
         reg_mux_in_[i] = regs[i];
-        reg_mux_sel = num_regs - counter - 1; //value truncated to reg_bits
-        resp_msg = reg_mux_out;
       end
     end
   endgenerate

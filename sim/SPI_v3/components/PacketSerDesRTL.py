@@ -17,38 +17,41 @@ rtl_language = 'pymtl'
 from os import path
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
+from pymtl3.stdlib.stream.ifcs import MinionIfcRTL
 
-class LoopBackVRTL( VerilogPlaceholder, Component ):
+class PacketSerDesVRTL( VerilogPlaceholder, Component ):
 
   # Constructor
 
-  def construct( s, nbits=32):
-    # Local Parameters
-    s.nbits = nbits
-  
-    # Interface
-  
-    s.recv = RecvIfcRTL( mk_bits(s.nbits) )
-    s.send = SendIfcRTL( mk_bits(s.nbits) )
-  
+  def construct( s, nbits_in, nbits_out ):
 
-    s.set_metadata( VerilogTranslationPass.explicit_module_name, f'LoopBackRTL_{nbits}nbits' )
+    s.set_metadata( VerilogTranslationPass.explicit_module_name, f'PacketSerDesRTL_{nbits_in}nbits_in_{nbits_out}nbits_out' )
+
+    s.nbits_in = nbits_in
+    s.nbits_out = nbits_out
+
+    s.serdes_ifc = MinionIfcRTL(mk_bits(s.nbits_in), mk_bits(s.nbits_out))
 
     s.set_metadata( VerilogPlaceholderPass.port_map, {
-      s.recv.val  : 'recv_val',
-      s.recv.rdy  : 'recv_rdy',
-      s.recv.msg  : 'recv_msg',
-
-      s.send.val  : 'send_val',
-      s.send.rdy  : 'send_rdy',
-      s.send.msg  : 'send_msg',
+      s.serdes_ifc.req.rdy  : 'req_rdy',
+      s.serdes_ifc.req.val  : 'req_val',
+      s.serdes_ifc.req.msg  : 'req_msg',
+      s.serdes_ifc.resp.rdy : 'resp_rdy',
+      s.serdes_ifc.resp.val : 'resp_val',
+      s.serdes_ifc.resp.msg : 'resp_msg',
     })
+
+# For to force testing a specific RTL language
+import sys
+if hasattr( sys, '_called_from_test' ):
+  if sys._pymtl_rtl_override:
+    rtl_language = sys._pymtl_rtl_override
 
 # Import the appropriate version based on the rtl_language variable
 
 if rtl_language == 'pymtl':
-  from .LoopBackPRTL import LoopBackPRTL as LoopBackRTL
+  from .PacketSerDesPRTL import PacketSerDesPRTL as PacketSerDesRTL
 elif rtl_language == 'verilog':
-  LoopBackRTL = LoopBackVRTL
+  PacketSerDesRTL = PacketSerDesVRTL
 else:
   raise Exception("Invalid RTL language!")

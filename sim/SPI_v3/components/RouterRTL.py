@@ -17,15 +17,30 @@ rtl_language = 'pymtl'
 from os import path
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
-# from pymtl3.stdlib.stream.ifcs import MinionIfcRTL, MasterIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL, MinionIfcRTL
+
+def mk_router_msg(nbits, addr_nbits):
+  @bitstruct
+  class RouterMsg:
+    addr: mk_bits(addr_nbits)
+    data: mk_bits(nbits)
+  return RouterMsg
 
 
 class RouterVRTL( VerilogPlaceholder, Component ):
     
-  def construct( s, nbits=32):
+  def construct( s, nbits, num_outputs ):
 
     # Local Parameters
     s.nbits = nbits
+    s.num_outputs = num_outputs # parameterized by number of components the router outputs to
+    s.addr_nbits = max(1, clog2(num_outputs)) # allow 1 output to still work
+
+    # Interface
+    s.recv = RecvIfcRTL(mk_router_msg(s.nbits, s.addr_nbits)) # recv msg will be (s.nbits + s.addr_nbits) long
+    s.send = [ SendIfcRTL(mk_bits(s.nbits)) for _ in range(s.num_outputs) ]
+
+
 
 #     # Ports
 

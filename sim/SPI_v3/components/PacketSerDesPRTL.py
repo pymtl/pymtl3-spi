@@ -1,0 +1,39 @@
+'''
+==========================================================================
+PacketSerDesPRTL.py
+==========================================================================
+Generic packet serialized/deserializer. 
+Instantiates either a PacketAssembler or PacketDisassembler based on the 
+nbits_in and nbits_out parameters.
+
+Author: Kyle Infantino
+May 31, 2022
+'''
+
+from pymtl3 import *
+from pymtl3.stdlib.basic_rtl import Mux
+from pymtl3.stdlib.stream.ifcs import MinionIfcRTL
+from math import ceil
+from .PacketAssemblerPRTL import PacketAssemblerPRTL
+from .PacketDisassemblerPRTL import PacketDisassemblerPRTL
+
+class PacketSerDesPRTL( Component ):
+
+  def construct( s, nbits_in, nbits_out ):
+
+    # Local Parameters
+    s.nbits_in = nbits_in
+    s.nbits_out = nbits_out
+
+    # Interface
+    s.serdes_ifc = MinionIfcRTL(mk_bits(s.nbits_in), mk_bits(s.nbits_out))
+
+    if nbits_in > nbits_out:
+      s.module = PacketDisassemblerPRTL(s.nbits_in, s.nbits_out)
+      s.module.disassem_ifc //= s.serdes_ifc
+    else:
+      s.module = PacketAssemblerPRTL(s.nbits_in, s.nbits_out)
+      s.module.assem_ifc //= s.serdes_ifc
+
+  def line_trace( s ):
+    return f'{s.serdes_ifc.req.msg}(){s.serdes_ifc.resp.msg}'

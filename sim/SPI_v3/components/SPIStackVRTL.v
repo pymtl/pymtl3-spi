@@ -15,32 +15,32 @@
 `include "SPI_v3/components/SPIMinionAdapterCompositeVRTL.v"
 `include "SPI_v3/components/Synchronizer.v"
 
-module SPI_v3_components_SPIstackVRTL 
+module SPI_v3_components_SPIStackVRTL 
 #(
-    parameter nbits = 34, // the size of the val/rdy msg for the SPI minion
-    parameter num_entries = 1
+  parameter nbits = 34, // the size of the val/rdy msg for the SPI minion
+  parameter num_entries = 1
 )(
-    input  logic clk,
-    input  logic reset,
+  input  logic clk,
+  input  logic reset,
 
-    input  logic loopthrough_sel,
-    output logic minion_parity,
-    output logic adapter_parity,
+  input  logic loopthrough_sel,
+  output logic minion_parity,
+  output logic adapter_parity,
 
-    // SPI Minion Ifc
-    input  logic sclk,
-    input  logic cs,
-    input  logic mosi,
-    output logic miso,
+  // SPI Minion Ifc
+  input  logic sclk,
+  input  logic cs,
+  input  logic mosi,
+  output logic miso,
 
-    // Send/Recv Ifc
-    output logic                 send_val,
-    output logic [(nbits-2)-1:0] send_msg,
-    input  logic                 send_rdy,
+  // Send/Recv Ifc
+  output logic                 send_val,
+  output logic [(nbits-2)-1:0] send_msg,
+  input  logic                 send_rdy,
 
-    input  logic                 recv_val, 
-    input  logic [(nbits-2)-1:0] recv_msg, 
-    output logic                 recv_rdy
+  input  logic                 recv_val, 
+  input  logic [(nbits-2)-1:0] recv_msg, 
+  output logic                 recv_rdy
 );
 
   logic              minion_out_val;
