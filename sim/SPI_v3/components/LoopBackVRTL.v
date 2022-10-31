@@ -27,6 +27,7 @@ module SPI_v3_components_LoopBackVRTL
   output logic             send_val,
   input  logic             send_rdy,
   output logic [nbits-1:0] send_msg
+);
   
   logic [nbits-1:0] reg_;
   logic             transaction_val;
