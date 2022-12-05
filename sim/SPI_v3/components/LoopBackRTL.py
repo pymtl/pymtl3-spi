@@ -17,6 +17,7 @@ rtl_language = 'pymtl'
 from os import path
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 
 class LoopBackVRTL( VerilogPlaceholder, Component ):
 

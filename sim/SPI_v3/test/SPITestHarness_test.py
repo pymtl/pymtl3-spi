@@ -30,7 +30,7 @@ def test_one( cmdline_opts ):
 def test_basic( cmdline_opts ):
 
   nbits = 32 #data size
-  model = SPILoopBackCompositeRTL((nbits+2))
+  model = SPILoopBackCompositePRTL((nbits+2))
   model.elaborate()
 
   spi_harness = SPITestHarness( model, 0, 34, cmdline_opts)
@@ -42,7 +42,7 @@ def test_basic( cmdline_opts ):
 def test_one_comp( cmdline_opts ):
 
   nbits = 32 #data size
-  model = SPILoopBackCompositeRTL((nbits+2))
+  model = SPILoopBackCompositePRTL((nbits+2))
   model.elaborate()
 
   spi_harness = SPITestHarness( model, 1, 34, cmdline_opts)
@@ -54,7 +54,7 @@ def test_one_comp( cmdline_opts ):
 def test_sim_multiple_components( cmdline_opts ):
 
   nbits = 4 #data size
-  model = SPILoopBackCompositeRTL(10) #spi packet size (2 flow, 4 comp, 4 data)
+  model = SPILoopBackCompositePRTL(10) #spi packet size (2 flow, 4 comp, 4 data)
   model.elaborate()
 
   spi_harness = SPITestHarness( model, 16, 10, cmdline_opts) #16 comp addresses, 10 bit spi packet
@@ -64,7 +64,7 @@ def test_sim_multiple_components( cmdline_opts ):
 
 def test_random( cmdline_opts ):
   nbits = 32
-  model = SPILoopBackCompositeRTL((nbits+2))
+  model = SPILoopBackCompositePRTL((nbits+2))
   model.elaborate()
 
   spi_harness = SPITestHarness( model, 0, 34, cmdline_opts)
@@ -77,7 +77,7 @@ def test_random( cmdline_opts ):
 
 def test_16_bits( cmdline_opts ):
 
-  model = SPILoopBackCompositeRTL(16)
+  model = SPILoopBackCompositePRTL(16)
   model.elaborate()
   spi_harness = SPITestHarness( model, 0, 16, cmdline_opts)
 
@@ -94,7 +94,7 @@ def test_16_bits( cmdline_opts ):
 
 def test_37_bits( cmdline_opts ):
 
-  model = SPILoopBackCompositeRTL(37)
+  model = SPILoopBackCompositePRTL(37)
   model.elaborate()
   spi_harness = SPITestHarness( model, 0, 37, cmdline_opts)
 
