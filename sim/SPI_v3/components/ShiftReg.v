@@ -10,7 +10,8 @@ N-bit shift register.
 
 module SPI_v3_components_ShiftReg
 #(
-    parameter nbits = 8
+    parameter nbits = 8,
+    parameter reset_value = 1'b0
 )
 (
   input  logic             clk,
@@ -25,7 +26,7 @@ module SPI_v3_components_ShiftReg
   always_ff @(posedge clk) 
   begin 
     if ( reset ) begin
-      out <= { nbits{1'b0}};
+      out <= { nbits{reset_value}};
     end
     else if ( load_en ) begin
       out <= load_data;

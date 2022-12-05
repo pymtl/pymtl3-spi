@@ -107,7 +107,7 @@ class SPIMasterValRdyPRTL( Component ):
       s.packet_size_reg.en  @= 0
       s.cs_addr_reg.en      @= 0
       for i in range(ncs):
-        s.spi_ifc.cs[i]             @= 1
+        s.spi_ifc.cs[i]     @= 1
       s.sclk_negedge        @= 0
       s.sclk_posedge        @= 0
       s.sclk_counter_en     @= 0
@@ -125,7 +125,7 @@ class SPIMasterValRdyPRTL( Component ):
       #-------------------------------------------------------------------    
       elif s.state == s.STATE_START0: #start
         s.spi_ifc.cs[s.cs_addr_reg.out] @= 0
-        s.shreg_out_rst         @= 1
+        s.shreg_out_rst                 @= 1
       #-------------------------------------------------------------------
       # STATE: START1
       #------------------------------------------------------------------- 
@@ -159,6 +159,8 @@ class SPIMasterValRdyPRTL( Component ):
       elif s.state == s.STATE_DONE: #done
         s.recv.rdy @= 1
         s.send.val @= 1
+        s.packet_size_reg.en  @= s.packet_size_ifc.val
+        s.cs_addr_reg.en      @= s.cs_addr_ifc.val
 
     # sclk counter logic
     s.sclk_counter = Wire(s.logBitsN)

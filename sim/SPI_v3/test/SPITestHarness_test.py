@@ -11,13 +11,13 @@ random.seed(0xdeadbeef)
 
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
-from ..components.SPILoopBackCompositeRTL import SPILoopBackCompositeRTL
+from ..components.SPILoopBackCompositePRTL import SPILoopBackCompositePRTL
 from ..components.SPITestHarness import SPITestHarness
 
 def test_one( cmdline_opts ):
 
   nbits = 4
-  model = SPILoopBackCompositeRTL((nbits+2))
+  model = SPILoopBackCompositePRTL((nbits+2))
   model.elaborate()
 
   spi_harness = SPITestHarness( model, 0, 6, cmdline_opts)

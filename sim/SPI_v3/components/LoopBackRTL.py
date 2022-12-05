@@ -44,6 +44,12 @@ class LoopBackVRTL( VerilogPlaceholder, Component ):
       s.send.msg  : 'send_msg',
     })
 
+# For to force testing a specific RTL language
+import sys
+if hasattr( sys, '_called_from_test' ):
+  if sys._pymtl_rtl_override:
+    rtl_language = sys._pymtl_rtl_override
+    
 # Import the appropriate version based on the rtl_language variable
 
 if rtl_language == 'pymtl':

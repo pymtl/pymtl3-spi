@@ -34,26 +34,25 @@ class SPILoopBackCompositeVRTL( VerilogPlaceholder, Component ):
     s.spi_min = SPIMinionIfc()
     s.minion_parity = OutPort()
     s.adapter_parity = OutPort()
-    
-    # s.recv = RecvIfcRTL( mk_bits(nbits-2))
-    # s.send = SendIfcRTL( mk_bits(nbits-2))
 
-    # s.set_metadata( VerilogPlaceholderPass.port_map, {
-    #   s.cs    : 'cs',
-    #   s.sclk  : 'sclk',
-    #   s.mosi  : 'mosi',
-    #   s.miso  : 'miso',
 
-    #   s.recv.val  : 'recv_val',
-    #   s.recv.rdy  : 'recv_rdy',
-    #   s.recv.msg  : 'recv_msg',
+    s.set_metadata( VerilogPlaceholderPass.port_map, {
+      s.spi_min.cs    : 'cs',
+      s.spi_min.sclk  : 'sclk',
+      s.spi_min.mosi  : 'mosi',
+      s.spi_min.miso  : 'miso',
 
-    #   s.send.val  : 'send_val',
-    #   s.send.rdy  : 'send_rdy',
-    #   s.send.msg  : 'send_msg',
-    # })
+      s.minion_parity   : 'minion_parity',
+      s.adapter_parity  : 'adapter_parity',
+    })
 
 # Import the appropriate version based on the rtl_language variable
+
+# For to force testing a specific RTL language
+import sys
+if hasattr( sys, '_called_from_test' ):
+  if sys._pymtl_rtl_override:
+    rtl_language = sys._pymtl_rtl_override
 
 if rtl_language == 'pymtl':
   from .SPILoopBackCompositePRTL import SPILoopBackCompositePRTL as SPILoopBackCompositeRTL

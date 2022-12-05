@@ -12,7 +12,6 @@ Author : Kyle Infantino
 `ifndef SPI_V3_COMPONENTS_LOOPBACKCOMPOSITE_V
 `define SPI_V3_COMPONENTS_LOOPBACKCOMPOSITE_V
 
-from .SPIMinionAdapterCompositePRTL import SPIMinionAdapterCompositePRTL
 `include "SPI_v3/components/LoopBackVRTL.v"
 `include "SPI_v3/components/SPIMinionAdapterCompositeVRTL.v"
 
