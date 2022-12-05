@@ -54,7 +54,7 @@ def test_2disassems(cmdline_opts):
       dut.recv[i].val   @= 0
   dut.send.rdy   @= 0
   dut.sim_reset()
-  #          req_val    req_rdy resp_val  resp_rdy    in_     out_addr   out_data
+  #          recv_val    req_rdy send_val  send_rdy    in_     out_addr   out_data
   t( dut,    [1,1],     [1,0],      1,        1,      [8,7],      0,       8 ) 
   t( dut,    [1,0],     [1,0],      1,        1,      [2,1],      0,       2 )
   t( dut,    [0,1],     [0,1],      1,        1,      [0,3],      1,       3 ) 

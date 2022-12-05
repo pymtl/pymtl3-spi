@@ -10,55 +10,61 @@
 //   Date : Dec 19, 2021
 
 
-module ArbitratorVRTL
+module SPI_v3_components_ArbitratorVRTL
 #(
-  parameter nbits = 32,
-  parameter num_inputs = 6,
+  parameter nbits = 4,
+  parameter num_inputs = 2,
   parameter addr_nbits = $clog2(num_inputs)
 )
 (
-  input clk,
-  input reset,
+  input logic clk,
+  input logic reset,
 
-  // Receive Interface - need req signals for each component connected to arbitrator
-  input                          req_val [num_inputs-1:0],
-  output                         req_rdy [num_inputs-1:0],
-  input  [nbits-1:0]             req_msg [num_inputs-1:0],
+  // Receive Interface - need recv signals for each component connected to arbitrator
+  input   logic                       recv_val [num_inputs-1:0],
+  output  logic                       recv_rdy [num_inputs-1:0],
+  input   logic [nbits-1:0]           recv_msg [num_inputs-1:0],
 
   // Send Interface
-  output                         resp_val,
-  input                          resp_rdy,
-  output [addr_nbits+nbits-1:0]  resp_msg
+  output logic                        send_val,
+  input  logic                        send_rdy,
+  output logic [addr_nbits+nbits-1:0] send_msg
 );
 
   logic [addr_nbits-1:0] grants_index; // which input is granted access to send to SPI
   logic [addr_nbits-1:0] old_grants_index;
   logic [addr_nbits-1:0] encoder_out;
+  logic [nbits-1:0]      send_msg_data;
 
-  assign resp_val = req_val[grants_index] & req_rdy[grants_index];
-  assign resp_msg = {grants_index, req_msg[grants_index]}; // append component address to the beginning of the message
+  assign send_msg_data = recv_msg[grants_index];
+  assign send_val = recv_val[grants_index] & recv_rdy[grants_index];
+  assign send_msg = {grants_index, send_msg_data}; // append component address to the beginning of the message
     
   always_comb begin
     // change grants_index if the last cycle's grant index is 0 (that component has finished sending its message)
-    if (!req_val[old_grants_index]) begin
+    if (!recv_val[old_grants_index]) begin
       grants_index = encoder_out;
-    end
-    else begin
+    end else begin
       grants_index = grants_index;
     end
   end
 
   always_comb begin
-    // Only tell one input that the arbitrator is ready for it
-    req_rdy = 0;
-    req_rdy[grants_index] = resp_rdy;
+    for (integer j=0; j<num_inputs;j++) begin
+      // Only tell one input that the arbitrator is ready for it
+      if(j== grants_index) begin
+        recv_rdy[j] = send_rdy;
+      end else begin
+        recv_rdy[j] = 1'b0;
+      end
+    end
   end
-    
+      
   always_comb begin
     // priority encoder that gives highest priority to the LSB and lowest to MSB
     encoder_out = 0;
     for(integer i=0; i<num_inputs; i++) begin
-      if (req_val[num_inputs-1-i]) begin
+      if (recv_val[num_inputs-1-i]) begin
         encoder_out = num_inputs-1-i;
       end
     end
@@ -68,7 +74,7 @@ module ArbitratorVRTL
   // a PacketDisassembler component needs multiple cycles to fully send a message to the arbitrator. Thus, we do not want to 
   // change which Disassembler is allowed to send to the Arbitrator in the middle of a message.
   // Fix this by holding a trailing value of the grants_index.
-  // We need to be able to check the req_val of the old grants_index to make sure that it is not 1, then we can allow a different
+  // We need to be able to check the recv_val of the old grants_index to make sure that it is not 1, then we can allow a different
   // Disassembler to send a message
   always_ff @(posedge clk) begin
     if (reset) begin
