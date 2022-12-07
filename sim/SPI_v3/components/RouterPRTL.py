@@ -15,7 +15,7 @@ Author : Dilan Lakhani
 from pymtl3 import *
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL, MinionIfcRTL
 
-def mk_router_msg(nbits, addr_nbits):
+def mk_router_msg(addr_nbits, nbits):
   @bitstruct
   class RouterMsg:
     addr: mk_bits(addr_nbits)
@@ -32,7 +32,7 @@ class RouterPRTL( Component ):
     s.addr_nbits = max(1, clog2(num_outputs)) # allow 1 output to still work
 
     # Interface
-    s.recv = RecvIfcRTL(mk_router_msg(s.nbits, s.addr_nbits)) # recv msg will be (s.nbits + s.addr_nbits) long
+    s.recv = RecvIfcRTL(mk_router_msg(s.addr_nbits, s.nbits)) # recv msg will be (s.nbits + s.addr_nbits) long
     s.send = [ SendIfcRTL(mk_bits(s.nbits)) for _ in range(s.num_outputs) ]
 
 
