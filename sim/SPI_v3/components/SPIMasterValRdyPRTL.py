@@ -26,6 +26,7 @@ class SPIMasterValRdyPRTL( Component ):
     s.nbits = nbits                      # size of message
     s.ncs = ncs                          # number of chip select lines
     s.logBitsN = mk_bits(clog2(nbits)+1) # number of bits required to count to packet size
+    s.logCSN = mk_bits(clog2(s.ncs) if s.ncs > 1 else 1)
 
     # Interface
     s.spi_ifc = SPIMasterIfc( ncs )
@@ -34,12 +35,12 @@ class SPIMasterValRdyPRTL( Component ):
     s.recv = RecvIfcRTL( mk_bits(s.nbits) )
 
     s.packet_size_ifc = RecvIfcRTL( s.logBitsN ) # size of spi packet (up to nbits)
-    s.cs_addr_ifc = RecvIfcRTL( mk_bits(clog2(s.ncs) if s.ncs > 1 else 1) )
+    s.cs_addr_ifc = RecvIfcRTL( s.logCSN )
 
     s.packet_size_reg = m = RegEnRst( s.logBitsN )
     m.in_ //= s.packet_size_ifc.msg 
 
-    s.cs_addr_reg = m = RegEnRst( mk_bits(clog2(s.ncs) if s.ncs > 1 else 1) )
+    s.cs_addr_reg = m = RegEnRst( s.logCSN )
     m.in_ //= s.cs_addr_ifc.msg
 
     s.packet_size_ifc.rdy //= s.recv.rdy
@@ -144,9 +145,7 @@ class SPIMasterValRdyPRTL( Component ):
       # STATE: SCLK_LOW
       #------------------------------------------------------------------- 
       elif s.state == s.STATE_SCLK_LOW:
-        if s.sclk_counter == 0: s.sclk_posedge @= 0 # will not go high again if all bits were already read
-        else:                   s.sclk_posedge @= 1
-
+        s.sclk_posedge @= (s.sclk_counter != 0) # will not go high again if all bits were already read
         s.spi_ifc.cs[s.cs_addr_reg.out] @= 0
       #-------------------------------------------------------------------
       # STATE: CS_LOW_WAIT

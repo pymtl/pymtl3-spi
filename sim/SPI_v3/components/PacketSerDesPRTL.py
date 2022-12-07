@@ -31,13 +31,13 @@ class PacketSerDesPRTL( Component ):
     s.serdes_send = SendIfcRTL(mk_bits(s.nbits_out))
 
     if nbits_in > nbits_out:
-      s.module = PacketDisassemblerPRTL(s.nbits_in, s.nbits_out)
-      s.module.recv //= s.serdes_recv
-      s.module.send //= s.serdes_send
+      s.mod = PacketDisassemblerPRTL(s.nbits_in, s.nbits_out)
+      s.mod.recv //= s.serdes_recv
+      s.mod.send //= s.serdes_send
     else:
-      s.module = PacketAssemblerPRTL(s.nbits_in, s.nbits_out)
-      s.module.recv //= s.serdes_recv
-      s.module.send //= s.serdes_send
+      s.mod = PacketAssemblerPRTL(s.nbits_in, s.nbits_out)
+      s.mod.recv //= s.serdes_recv
+      s.mod.send //= s.serdes_send
 
   def line_trace( s ):
     return f'{s.serdes_recv.msg}(){s.serdes_send.msg}'

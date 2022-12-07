@@ -44,12 +44,12 @@ module SPI_v3_components_SPILoopBackCompositeVRTL
     .mosi(mosi),
     .reset(reset),
     .sclk(sclk),
-    .recv_msg(spi_recv_msg),
-    .recv_rdy(spi_recv_rdy),
-    .recv_val(spi_recv_val),
-    .send_msg(spi_send_msg),
-    .send_rdy(spi_send_rdy),
-    .send_val(spi_send_val),
+    .recv_msg(spi_send_msg),
+    .recv_rdy(spi_send_rdy),
+    .recv_val(spi_send_val),
+    .send_msg(spi_recv_msg),
+    .send_rdy(spi_recv_rdy),
+    .send_val(spi_recv_val),
     .minion_parity(minion_parity),
     .adapter_parity(adapter_parity)
   );

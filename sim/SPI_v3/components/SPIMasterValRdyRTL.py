@@ -42,30 +42,6 @@ class SPIMasterValRdyVRTL( VerilogPlaceholder, Component ):
     s.packet_size_ifc = RecvIfcRTL( s.logBitsN ) # size of spi packet (up to nbits)
     s.cs_addr_ifc = RecvIfcRTL( mk_bits(clog2(s.ncs) if s.ncs > 1 else 1) )
 
-    s.set_metadata( VerilogPlaceholderPass.port_map, {
-      s.spi_ifc.cs    : 'cs',
-      s.spi_ifc.sclk  : 'sclk',
-      s.spi_ifc.mosi  : 'mosi',
-      s.spi_ifc.miso  : 'miso',
-
-      s.recv.val  : 'recv_val',
-      s.recv.rdy  : 'recv_rdy',
-      s.recv.msg  : 'recv_msg',
-
-      s.send.val  : 'send_val',
-      s.send.rdy  : 'send_rdy',
-      s.send.msg  : 'send_msg',
-
-      s.packet_size_ifc.val : 'packet_size_ifc_val',
-      s.packet_size_ifc.rdy : 'packet_size_ifc_rdy',
-      s.packet_size_ifc.msg : 'packet_size_ifc_msg',
-
-      s.cs_addr_ifc : 'cs_addr_ifc_val',
-      s.cs_addr_ifc : 'cs_addr_ifc_rdy',
-      s.cs_addr_ifc : 'cs_addr_ifc_msg',
-
-    })
-
 # For to force testing a specific RTL language
 import sys
 if hasattr( sys, '_called_from_test' ):

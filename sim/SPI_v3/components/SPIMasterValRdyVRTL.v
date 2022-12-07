@@ -19,195 +19,173 @@ Author : Kyle Infantino
 module SPI_v3_components_SPIMasterValRdyVRTL
 #(
   parameter nbits = 34, 
-  parameter ncs = 1
+  parameter ncs = 1,
+  parameter logBitsN = $clog2(nbits)+1,
+  parameter logCSN = ncs > 1 ? $clog2(ncs) : 1
 )
 (
-  input  logic             clk,
-  input  logic             reset,
+  input  logic                clk,
+  input  logic                reset,
 
-  output logic [ncs-1:0]   cs,
-  input  logic             miso,
-  output logic             mosi,
-  output logic             sclk,
+  output logic                spi_ifc_cs [0:ncs-1],
+  input  logic                spi_ifc_miso,
+  output logic                spi_ifc_mosi,
+  output logic                spi_ifc_sclk,
 
-  input  logic              recv_val,
-  output logic              recv_rdy,
-  input  logic [nbits-1:0]  recv_msg,
+  input  logic                recv_val,
+  output logic                recv_rdy,
+  input  logic [nbits-1:0]    recv_msg,
 
-  output logic              send_val,
-  input  logic              send_rdy,
-  output logic [nbits-1:0]  send_msg,
+  output logic                send_val,
+  input  logic                send_rdy,
+  output logic [nbits-1:0]    send_msg,
 
-  input  logic                      packet_size_ifc_val,
-  output logic                      packet_size_ifc_rdy,
-  input  logic [$clog2(nbits)-1:0]  packet_size_ifc_msg,
+  input  logic                packet_size_ifc_val,
+  output logic                packet_size_ifc_rdy,
+  input  logic [logBitsN-1:0] packet_size_ifc_msg,
 
-  input  logic                    cs_addr_ifc_val,
-  output logic                    cs_addr_ifc_rdy,
-  input  logic [$clog2(ncs)-1:0]  cs_addr_ifc_msg
+  input  logic                cs_addr_ifc_val,
+  output logic                cs_addr_ifc_rdy,
+  input  logic [logCSN-1:0]   cs_addr_ifc_msg
 );
 
-  localparam logBitsN = $clog2(nbits)+1;
+  logic [logBitsN-1:0] packet_size_reg_out;
+  logic                packet_size_reg_en;
+  logic [logCSN-1:0]   cs_addr_reg_out;
+  logic                cs_addr_reg_en;
+  logic [logBitsN-1:0] sclk_counter;
+  logic                sclk_counter_en;
+  logic [nbits-1:0]    shreg_in_out;
+  logic [nbits-1:0]    shreg_out_out;
+
   vc_EnResetReg #(logBitsN) packet_size_reg (
     .clk(clk),   
     .reset(reset), 
-    .q(),     
-    .d(),     
-    .en()     
+    .q(packet_size_reg_out),     
+    .d(packet_size_ifc_msg),     
+    .en(packet_size_reg_en)     
   );
-  
 
-    m.in_ //= s.packet_size_ifc.msg 
+  vc_EnResetReg #(logCSN) cs_addr_reg (
+    .clk(clk),   
+    .reset(reset), 
+    .q(cs_addr_reg_out),     
+    .d(cs_addr_ifc_msg),     
+    .en(cs_addr_reg_en)     
+  );
 
-    s.cs_addr_reg = m = RegEnRst( mk_bits(clog2(s.ncs) if s.ncs > 1 else 1) )
-    m.in_ //= s.cs_addr_ifc.msg
+  assign packet_size_ifc_rdy = recv_rdy;
+  assign cs_addr_ifc_rdy = recv_rdy;
 
-    s.packet_size_ifc.rdy //= s.recv.rdy
-    s.cs_addr_ifc.rdy     //= s.recv.rdy
+  logic sclk_negedge;
+  logic sclk_posedge;
+  logic shreg_out_rst;
 
-    s.sclk_negedge = Wire()
-    s.sclk_posedge = Wire()
-    s.shreg_out_rst = Wire()
+  typedef enum logic [2:0] {STATE_INIT, STATE_START0, STATE_START1, STATE_SCLK_HIGH, 
+        STATE_SCLK_LOW, STATE_CS_LOW_WAIT, STATE_DONE} state_t;
 
-    # Components & Logic
-    s.STATE_INIT        = 0
-    s.STATE_START0      = 1 # pull chip select low
-    s.STATE_START1      = 2 # wait a cycle
-    s.STATE_SCLK_HIGH   = 3 # start toggling sclk
-    s.STATE_SCLK_LOW    = 4
-    s.STATE_CS_LOW_WAIT = 5
-    s.STATE_DONE        = 6
+  state_t state, next_state;
 
-    s.state = Wire(3)
-    s.nextState = Wire(3)
-    @update_ff
-    def up_state():
-      if s.reset: s.state <<= 0
-      else: s.state <<= s.nextState
+  //state transition logic
+  always_ff @( posedge clk ) begin : up_state
+    if (reset) state <= STATE_INIT;
+    else state <= next_state; 
+  end
 
-    @update
-    def up_stateChange():
-      if s.state == s.STATE_INIT: 
-        if s.recv.val: s.nextState @= s.STATE_START0
-        else: s.nextState @= s.STATE_INIT
-        
-      elif s.state == s.STATE_START0: 
-        s.nextState @= s.STATE_START1
-        
-      elif s.state == s.STATE_START1: 
-        s.nextState @= s.STATE_SCLK_HIGH
+  //next state logic
+  always_comb begin : up_stateChange
+    case(state)
+      STATE_INIT : next_state = (recv_val) ? STATE_START0 : STATE_INIT;
+      STATE_START0 : next_state = STATE_START1;
+      STATE_START1 : next_state = STATE_SCLK_HIGH;
+      STATE_SCLK_HIGH : next_state = STATE_SCLK_LOW;
+      STATE_SCLK_LOW : next_state = (!sclk_counter) ? STATE_CS_LOW_WAIT : STATE_SCLK_HIGH;
+      STATE_CS_LOW_WAIT : next_state = STATE_DONE;
+      STATE_DONE : begin
+                    if (recv_val) next_state = STATE_START0;
+                    else if (send_rdy) next_state = STATE_INIT;
+                    else next_state = STATE_DONE;
+                   end
+      default : next_state = STATE_INIT;
+    endcase
+  end
+    
+  // state outputs
+  always_comb begin : up_stateOutputs
+    recv_rdy = 0;
+    send_val = 0;
+    spi_ifc_sclk = 0;
+    packet_size_reg_en = 0;
+    cs_addr_reg_en = 0;
+    for (integer i=0; i < ncs; i++) begin
+      spi_ifc_cs[i] = 1;
+    end
+    sclk_negedge = 0;
+    sclk_posedge = 0;
+    sclk_counter_en = 0;
+    shreg_out_rst = 0;
 
-      elif s.state == s.STATE_SCLK_HIGH: #sclk toggle low
-        s.nextState @= s.STATE_SCLK_LOW
+    if (state == STATE_INIT) begin
+      recv_rdy           = 1;
+      packet_size_reg_en = packet_size_ifc_val;
+      cs_addr_reg_en     = cs_addr_ifc_val;
+    end else if (state == STATE_START0) begin
+      spi_ifc_cs[cs_addr_reg_out] = 0;
+      shreg_out_rst       = 1;
+    end else if (state == STATE_START1) begin
+      sclk_posedge        = 1;
+      spi_ifc_cs[cs_addr_reg_out] = 0;
+    end else if (state == STATE_SCLK_HIGH) begin
+      spi_ifc_cs[cs_addr_reg_out] = 0;
+      spi_ifc_sclk                = 1;
+      sclk_negedge                 = 1;
+      sclk_counter_en              = 1;
+    end else if (state == STATE_SCLK_LOW) begin
+      sclk_posedge                = (sclk_counter != 0);
+      spi_ifc_cs[cs_addr_reg_out] = 0;
+    end else if (state == STATE_CS_LOW_WAIT) begin
+      spi_ifc_cs[cs_addr_reg_out] = 0;
+    end else if (state == STATE_DONE) begin
+      recv_rdy           = 1;
+      send_val           = 1;
+      packet_size_reg_en = packet_size_ifc_val;
+      cs_addr_reg_en     = cs_addr_ifc_val;
+    end
+  end
 
-      elif s.state == s.STATE_SCLK_LOW: #sclk toggle high
-        if s.sclk_counter == 0: s.nextState @= s.STATE_CS_LOW_WAIT
-        else: s.nextState @= s.STATE_SCLK_HIGH
+  //sclk counter logic
+  always_ff @( posedge clk ) begin
+    if (reset) sclk_counter <= 0;
+    else if (recv_val & recv_rdy) sclk_counter <= packet_size_reg_out;
+    else if (sclk_counter_en) sclk_counter <= sclk_counter - 1;
+  end
 
-      elif s.state == s.STATE_CS_LOW_WAIT:
-        s.nextState @= s.STATE_DONE
-      
-      elif s.state == s.STATE_DONE: 
-        if s.recv.val: s.nextState @= s.STATE_START0 # if you get another req, immediately start another transaction
-        elif s.send.rdy: s.nextState @= s.STATE_INIT # if the data is read from the master, go back to INIT
-        else: s.nextState @= s.STATE_DONE
+  //Datapath
+  SPI_v3_components_ShiftReg #(nbits, 1'b0) shreg_in 
+  (
+    .clk(clk),
+    .in_(spi_ifc_miso),
+    .load_data(0),
+    .load_en(0),
+    .out(shreg_in_out),
+    .reset(shreg_out_rst),
+    .shift_en(sclk_posedge) 
+  );
 
-      else: #default
-        s.nextState @= s.STATE_INIT
+  SPI_v3_components_ShiftReg #(nbits, 1'b0) shreg_out 
+  (
+    .clk(clk),
+    .in_(0),
+    .load_data(recv_msg << (nbits-packet_size_reg_out)), // put message into most significant bits
+    .load_en(recv_rdy & recv_val),
+    .out(shreg_out_out),
+    .reset(reset),
+    .shift_en(sclk_negedge) 
+  );
 
-    #=====================================================================
-    # State Outputs
-    #=====================================================================
-
-    @update
-    def up_stateOutputs():
-      s.recv.rdy            @= 0 
-      s.send.val            @= 0 
-      s.spi_ifc.sclk        @= 0
-      s.packet_size_reg.en  @= 0
-      s.cs_addr_reg.en      @= 0
-      for i in range(ncs):
-        s.spi_ifc.cs[i]             @= 1
-      s.sclk_negedge        @= 0
-      s.sclk_posedge        @= 0
-      s.sclk_counter_en     @= 0
-      s.shreg_out_rst       @= 0
-      
-      #-------------------------------------------------------------------
-      # STATE: INIT
-      #-------------------------------------------------------------------
-      if s.state == s.STATE_INIT: #init
-        s.recv.rdy            @= 1
-        s.packet_size_reg.en  @= s.packet_size_ifc.val
-        s.cs_addr_reg.en      @= s.cs_addr_ifc.val
-      #-------------------------------------------------------------------
-      # STATE: START0
-      #-------------------------------------------------------------------    
-      elif s.state == s.STATE_START0: #start
-        s.spi_ifc.cs[s.cs_addr_reg.out] @= 0
-        s.shreg_out_rst         @= 1
-      #-------------------------------------------------------------------
-      # STATE: START1
-      #------------------------------------------------------------------- 
-      elif s.state == s.STATE_START1: #start
-        s.sclk_posedge @= 1
-        s.spi_ifc.cs[s.cs_addr_reg.out] @= 0
-      #-------------------------------------------------------------------
-      # STATE: SCLK_HIGH
-      #------------------------------------------------------------------- 
-      elif s.state == s.STATE_SCLK_HIGH:
-        s.spi_ifc.cs[s.cs_addr_reg.out] @= 0
-        s.spi_ifc.sclk @= 1
-        s.sclk_negedge @= 1
-        s.sclk_counter_en @= 1
-      #-------------------------------------------------------------------
-      # STATE: SCLK_LOW
-      #------------------------------------------------------------------- 
-      elif s.state == s.STATE_SCLK_LOW:
-        if s.sclk_counter == 0: s.sclk_posedge @= 0 # will not go high again if all bits were already read
-        else:                   s.sclk_posedge @= 1
-
-        s.spi_ifc.cs[s.cs_addr_reg.out] @= 0
-      #-------------------------------------------------------------------
-      # STATE: CS_LOW_WAIT
-      #------------------------------------------------------------------- 
-      elif s.state == s.STATE_CS_LOW_WAIT:
-        s.spi_ifc.cs[s.cs_addr_reg.out] @= 0
-      #-------------------------------------------------------------------
-      # STATE: DONE
-      #------------------------------------------------------------------- 
-      elif s.state == s.STATE_DONE: #done
-        s.recv.rdy @= 1
-        s.send.val @= 1
-        s.packet_size_reg.en  @= s.packet_size_ifc.val
-        s.cs_addr_reg.en      @= s.cs_addr_ifc.val
-
-    # sclk counter logic
-    s.sclk_counter = Wire(s.logBitsN)
-    s.sclk_counter_en = Wire(1)
-    @update_ff
-    def up_sclk_counter():
-      if s.reset: s.sclk_counter <<= 0
-      elif (s.recv.val & s.recv.rdy): s.sclk_counter <<= s.packet_size_reg.out
-      elif s.sclk_counter_en: s.sclk_counter <<= s.sclk_counter - 1
-
-    # Datapath
-    s.shreg_in = m = ShiftRegExtRst( s.nbits )
-    m.in_       //= s.spi_ifc.miso
-    m.shift_en  //= s.sclk_posedge 
-    m.load_en   //= 0
-    m.load_data //= 0
-    m.ext_reset //= s.shreg_out_rst
-
-    s.shreg_out = m = ShiftReg( s.nbits )
-    m.in_       //= 0
-    m.shift_en  //= s.sclk_negedge
-    m.load_en   //= lambda: s.recv.rdy & s.recv.val
-    m.load_data //= lambda: s.recv.msg << zext(((s.nbits-s.packet_size_reg.out)), s.nbits) # put message into most significant bits
-
-    s.spi_ifc.mosi     //= s.shreg_out.out[nbits-1]
-    s.send.msg //= s.shreg_in.out
+  assign spi_ifc_mosi = shreg_out_out[nbits-1];
+  assign send_msg = shreg_in_out;
 
 endmodule
 
-`endif SPI_V3_COMPONENTS_SPIMASTER_V
+`endif /*SPI_V3_COMPONENTS_SPIMASTER_V*/
