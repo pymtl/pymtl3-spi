@@ -42,48 +42,6 @@ class ArbitratorVRTL( VerilogPlaceholder, Component ):
     s.recv = [ RecvIfcRTL(mk_bits(s.nbits)) for _ in range(s.num_inputs) ]
     s.send = SendIfcRTL(mk_arb_msg(s.addr_nbits, s.nbits))
 
-    # s.recv_val = Wire(s.num_inputs)
-    # s.recv_rdy = Wire(s.num_inputs)
-    # s.recv_msg = Wire(s.num_inputs*s.nbits)
-
-    # # s.send_val = Wire()
-    # s.send_rdy = Wire()
-    # s.send_msg = Wire(s.nbits+s.addr_nbits)
-
-    s.recv_val_array = Wire(s.num_inputs)
-    s.recv_rdy_array = Wire(s.num_inputs)
-    s.recv_msg_array = Wire(s.num_inputs*s.nbits)
-
-    for i in range(s.num_inputs):
-      # s.recv_val_array[i] = s.recv[s.num_inputs-i-1].val
-      # s.recv_rdy_array[i] = s.recv[s.num_inputs-i-1].rdy
-      # s.recv_msg_array[i:(i+1)*s.nbits-1] = s.recv[s.num_inputs-i-1].msg
-      s.recv_val_array[i] = 0
-      s.recv_rdy_array[i] = 0
-      s.recv_msg_array[i:(i+1)*s.nbits-1] = 0
-    #   s.recv_val[i] = s.recv[i].val
-    #   s.recv_rdy[i] = s.recv[i].rdy
-    #   s.recv_msg[i:s.nbits*(i+1)-1] = s.recv[i].msg
-
-
-    # s.send.msg.addr = s.send_msg[s.nbits:s.nbits+s.addr_nbits-1]
-    # s.send.msg.data = s.send_msg[0:s.nbits-1]
-    # s.send_val = s.send.val
-    # s.send.val = s.send_val
-    # s.send.rdy = s.send_rdy
-
-
-
-    s.set_metadata( VerilogPlaceholderPass.port_map, {
-      s.recv_val_array : "recv_val",
-      s.recv_rdy_array : "recv_rdy",
-      s.recv_msg_array : "recv_msg",
-
-      s.send.val  : 'send_val',
-      s.send.rdy  : 'send_rdy',
-      s.send.msg :  'send_msg'
-    })
-
 
 # For to force testing a specific RTL language
 import sys

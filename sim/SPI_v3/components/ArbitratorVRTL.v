@@ -21,9 +21,9 @@ module SPI_v3_components_ArbitratorVRTL
   input logic reset,
 
   // Receive Interface - need recv signals for each component connected to arbitrator
-  input   logic                       recv_val [num_inputs-1:0],
-  output  logic                       recv_rdy [num_inputs-1:0],
-  input   logic [nbits-1:0]           recv_msg [num_inputs-1:0],
+  input   logic                       recv_val [0:num_inputs-1],
+  output  logic                       recv_rdy [0:num_inputs-1],
+  input   logic [nbits-1:0]           recv_msg [0:num_inputs-1],
 
   // Send Interface
   output logic                        send_val,
@@ -35,10 +35,12 @@ module SPI_v3_components_ArbitratorVRTL
   logic [addr_nbits-1:0] old_grants_index;
   logic [addr_nbits-1:0] encoder_out;
   logic [nbits-1:0]      send_msg_data;
+  logic [addr_nbits-1:0] send_msg_addr;
 
   assign send_msg_data = recv_msg[grants_index];
+  assign send_msg_addr = grants_index;
   assign send_val = recv_val[grants_index] & recv_rdy[grants_index];
-  assign send_msg = {grants_index, send_msg_data}; // append component address to the beginning of the message
+  assign send_msg = {send_msg_addr, send_msg_data}; // append component address to the beginning of the message
     
   always_comb begin
     // change grants_index if the last cycle's grant index is 0 (that component has finished sending its message)
@@ -52,7 +54,7 @@ module SPI_v3_components_ArbitratorVRTL
   always_comb begin
     for (integer j=0; j<num_inputs;j++) begin
       // Only tell one input that the arbitrator is ready for it
-      if(j== grants_index) begin
+      if(grants_index == j) begin
         recv_rdy[j] = send_rdy;
       end else begin
         recv_rdy[j] = 1'b0;
