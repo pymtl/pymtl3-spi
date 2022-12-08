@@ -1,5 +1,5 @@
 // ==========================================================================
-// SPIMinionAdapterCompositePRTL.py
+// SPIMinionAdapterCompositeVRTL.v
 // ==========================================================================
 // A composition module combining the SPIMinion and SPIMinionAdapter 
 
