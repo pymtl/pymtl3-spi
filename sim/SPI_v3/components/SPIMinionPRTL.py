@@ -2,7 +2,7 @@
 ==========================================================================
 SPIMinionPRTL.py
 ==========================================================================
-SPIMinion module. Supports SPI mode 3
+SPIMinion module. Supports SPI mode 0
 
 Author : Yanghui Ou, Modified by Kyle Infantino
 '''
@@ -52,8 +52,6 @@ class SPIMinionPRTL( Component ):
     m.load_en   //= s.pull.en
     m.load_data //= s.pull.msg
 
-    # TODO: register pull/push signal for one cycle?
-    # TODO: force pull/push to 0 during reset?
     s.spi_min.miso  //= s.shreg_out.out[s.nbits-1]
     s.pull.en       //= s.cs_sync.negedge_
     s.push.en       //= s.cs_sync.posedge_

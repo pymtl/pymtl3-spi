@@ -16,11 +16,11 @@ from pymtl3 import *
 
 class SPIMasterIfc( Interface ):
 
-  def construct( s ):
-    s.sclk  = OutPort()
-    s.cs    = OutPort()
-    s.mosi  = OutPort()
-    s.miso  = InPort()
+  def construct( s, ncs ):
+    s.cs   = [ OutPort() for _ in range(ncs) ] 
+    s.sclk = OutPort()
+    s.mosi = OutPort()
+    s.miso = InPort()
 
   def __str__( s ):
     return f"{s.sclk}|{s.cs}|{s.mosi}|{s.miso}"

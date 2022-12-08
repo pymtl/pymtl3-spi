@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-Loopback_test.py
+LoopBackRTL_test.py
 ==========================================================================
 Unit test for Loopback.
 '''
@@ -8,7 +8,7 @@ Unit test for Loopback.
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
 
-from ..components.Loopback import Loopback
+from ..components.LoopBackRTL import LoopBackRTL
 
 # Helper function
 def t( dut, recv_val, recv_rdy, send_val, send_rdy, recv_msg, send_msg):
@@ -37,7 +37,7 @@ def t( dut, recv_val, recv_rdy, send_val, send_rdy, recv_msg, send_msg):
 # This test is for Loopback(32)
 def test_basic(cmdline_opts):
 
-  dut = Loopback(32)
+  dut = LoopBackRTL(32)
   dut = config_model_with_cmdline_opts( dut, cmdline_opts, duts=[] )
   dut.apply( DefaultPassGroup( linetrace=True ) )
 

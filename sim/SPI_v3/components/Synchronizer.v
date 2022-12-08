@@ -8,9 +8,12 @@ Synchronizer.v
  - Reference: https://www.fpga4fun.com/SPI2.html
 */
 
-module Synchronizer 
+`ifndef SPI_V3_COMPONENTS_SYNCHRONIZER_V
+`define SPI_V3_COMPONENTS_SYNCHRONIZER_V
+
+module SPI_v3_components_Synchronizer 
 #(
-    parameter reset_value = 1'b0
+  parameter reset_value = 1'b0
 )(
   input  logic clk ,
   input  logic in_,
@@ -38,3 +41,5 @@ module Synchronizer
   assign out = shreg[1];
 
 endmodule
+
+`endif /* SPI_V3_COMPONENTS_SYNCHRONIZER_V */

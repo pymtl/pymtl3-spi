@@ -72,6 +72,5 @@ class SPIMinionAdapterPRTL( Component ):
       s.pull.msg.data @= s.cm_q.send.msg & (sext(s.pull.msg.val, s.nbits_minus2))
       
       
-
   def line_trace( s ):
     return f"mc_recv_rdy {s.mc_q.recv.rdy} mc_recv_val {s.mc_q.recv.val} cm_send_rdy {s.cm_q.send.rdy} cm_send_val {s.cm_q.send.val} mc_count {s.mc_q.count} cm_count {s.cm_q.count}"

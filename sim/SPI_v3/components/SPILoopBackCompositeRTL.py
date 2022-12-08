@@ -17,32 +17,36 @@ rtl_language = 'pymtl'
 from os import path
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
-from pymtl3.stdlib.stream.ifcs import RecvIfcRTL
-from pymtl3.stdlib.stream.ifcs import SendIfcRTL
+from ..interfaces.SPIIfc import SPIMinionIfc
 
-class PacketAssemblerVRTL( VerilogPlaceholder, Component ):
+class SPILoopBackCompositeVRTL( VerilogPlaceholder, Component ):
 
   # Constructor
 
-  def construct( s, nbits_in, nbits_out ):
+  def construct( s, nbits=32 ):
 
-    s.set_metadata( VerilogTranslationPass.explicit_module_name, f'PacketAssemblerRTL_{nbits_in}nbits_in_{nbits_out}nbits_out' )
-    s.nbits_in = nbits_in
-    s.nbits_out = nbits_out
+    #Local parameters
 
-    # s.assem_ifc = MinionIfcRTL(mk_bits(s.nbits_in), mk_bits(s.nbits_out))
-    s.recv = RecvIfcRTL(mk_bits(s.nbits_in))
-    s.send = SendIfcRTL(mk_bits(s.nbits_out))
+    s.nbits = nbits  # size of SPI packet including 2 bit flow control
+
+    #Interface
+
+    s.spi_min = SPIMinionIfc()
+    s.minion_parity = OutPort()
+    s.adapter_parity = OutPort()
+
 
     s.set_metadata( VerilogPlaceholderPass.port_map, {
-      s.recv.rdy  : 'recv_rdy',
-      s.recv.val  : 'recv_val',
-      s.recv.msg  : 'recv_msg',
-      s.send.rdy  : 'send_rdy',
-      s.send.val  : 'send_val',
-      s.send.msg  : 'send_msg',
+      s.spi_min.cs    : 'cs',
+      s.spi_min.sclk  : 'sclk',
+      s.spi_min.mosi  : 'mosi',
+      s.spi_min.miso  : 'miso',
 
+      s.minion_parity   : 'minion_parity',
+      s.adapter_parity  : 'adapter_parity',
     })
+
+# Import the appropriate version based on the rtl_language variable
 
 # For to force testing a specific RTL language
 import sys
@@ -50,11 +54,9 @@ if hasattr( sys, '_called_from_test' ):
   if sys._pymtl_rtl_override:
     rtl_language = sys._pymtl_rtl_override
 
-# Import the appropriate version based on the rtl_language variable
-
 if rtl_language == 'pymtl':
-  from .PacketAssemblerPRTL import PacketAssemblerPRTL as PacketAssemblerRTL
+  from .SPILoopBackCompositePRTL import SPILoopBackCompositePRTL as SPILoopBackCompositeRTL
 elif rtl_language == 'verilog':
-  PacketAssemblerRTL = PacketAssemblerVRTL
+  SPILoopBackCompositeRTL = SPILoopBackCompositeVRTL
 else:
   raise Exception("Invalid RTL language!")

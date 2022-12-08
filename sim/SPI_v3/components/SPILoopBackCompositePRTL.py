@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-SPILoopbackComposite.py
+SPILoopBackCompositePRTL.py
 ==========================================================================
 A composition module consisting of SPIMinionAdapterComposite and Loopback modules.
 For use with testing SPI communication
@@ -12,10 +12,10 @@ Author : Kyle Infantino
 
 from pymtl3 import *
 from .SPIMinionAdapterCompositePRTL import SPIMinionAdapterCompositePRTL
-from .Loopback import Loopback
+from .LoopBackPRTL import LoopBackPRTL
 from ..interfaces.SPIIfc import SPIMinionIfc
 
-class SPILoopbackComposite( Component ):
+class SPILoopBackCompositePRTL( Component ):
 
   def construct( s, nbits=32 ):
 
@@ -24,13 +24,16 @@ class SPILoopbackComposite( Component ):
     s.nbits = nbits  # size of SPI packet including 2 bit flow control
 
     #Interface
-
     s.spi_min = SPIMinionIfc()
+    s.minion_parity = OutPort()
+    s.adapter_parity = OutPort()
 
     s.composite = m = SPIMinionAdapterCompositePRTL(s.nbits, 1)
     m.spi_min   //= s.spi_min
+    m.minion_parity //= s.minion_parity
+    m.adapter_parity //= s.adapter_parity
 
-    s.loopback = m = Loopback(s.nbits-2)
+    s.loopback = m = LoopBackPRTL(s.nbits-2)
     m.recv //= s.composite.send
     m.send //= s.composite.recv
 

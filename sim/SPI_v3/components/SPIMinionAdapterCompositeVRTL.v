@@ -1,6 +1,14 @@
-//-------------------------------------------------------------------------
+// ==========================================================================
 // SPIMinionAdapterCompositeVRTL.v
-//-------------------------------------------------------------------------
+// ==========================================================================
+// A composition module combining the SPIMinion and SPIMinionAdapter 
+
+// Author : Kyle Infantino
+//   Date : Dec 7, 2021
+
+`ifndef SPI_V3_COMPONENTS_MINION_ADAPTER_COMPOSITE_V
+`define SPI_V3_COMPONENTS_MINION_ADAPTER_COMPOSITE_V
+
 `include "SPI_v3/components/SPIMinionVRTL.v"
 `include "SPI_v3/components/SPIMinionAdapterVRTL.v"
 
@@ -77,8 +85,10 @@ module SPI_v3_components_SPIMinionAdapterCompositeVRTL
   assign pull_msg[nbits-1]   =  pull_msg_val;
   assign pull_msg[nbits-2]   =  pull_msg_spc;
   assign pull_msg[nbits-3:0] =  pull_msg_data;
-  assign push_msg_val_wrt = push_msg[nbits-1];
-  assign push_msg_val_rd  = push_msg[nbits-2];
-  assign push_msg_data    = push_msg[nbits-3:0];
+  assign push_msg_val_wrt    = push_msg[nbits-1];
+  assign push_msg_val_rd     = push_msg[nbits-2];
+  assign push_msg_data       = push_msg[nbits-3:0];
 
 endmodule
+
+`endif /* SPI_V3_COMPONENTS_MINION_ADAPTER_COMPOSITE_V */

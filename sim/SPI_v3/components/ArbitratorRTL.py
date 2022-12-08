@@ -17,32 +17,31 @@ rtl_language = 'pymtl'
 from os import path
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
-from pymtl3.stdlib.stream.ifcs import RecvIfcRTL
-from pymtl3.stdlib.stream.ifcs import SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 
-class PacketAssemblerVRTL( VerilogPlaceholder, Component ):
+def mk_arb_msg(addr_nbits, data_nbits):
+  @bitstruct
+  class ArbitratorMsg:
+    addr: mk_bits(addr_nbits)
+    data: mk_bits(data_nbits)
+  return ArbitratorMsg
+
+class ArbitratorVRTL( VerilogPlaceholder, Component ):
 
   # Constructor
 
-  def construct( s, nbits_in, nbits_out ):
+  def construct( s, nbits, num_inputs ):
 
-    s.set_metadata( VerilogTranslationPass.explicit_module_name, f'PacketAssemblerRTL_{nbits_in}nbits_in_{nbits_out}nbits_out' )
-    s.nbits_in = nbits_in
-    s.nbits_out = nbits_out
+    s.set_metadata( VerilogTranslationPass.explicit_module_name, f'ArbitratorRTL_{nbits}nbits_{num_inputs}num_inputs' )
 
-    # s.assem_ifc = MinionIfcRTL(mk_bits(s.nbits_in), mk_bits(s.nbits_out))
-    s.recv = RecvIfcRTL(mk_bits(s.nbits_in))
-    s.send = SendIfcRTL(mk_bits(s.nbits_out))
+    s.nbits = nbits
+    s.num_inputs = num_inputs
+    s.addr_nbits = clog2(num_inputs)
 
-    s.set_metadata( VerilogPlaceholderPass.port_map, {
-      s.recv.rdy  : 'recv_rdy',
-      s.recv.val  : 'recv_val',
-      s.recv.msg  : 'recv_msg',
-      s.send.rdy  : 'send_rdy',
-      s.send.val  : 'send_val',
-      s.send.msg  : 'send_msg',
+    # interface
+    s.recv = [ RecvIfcRTL(mk_bits(s.nbits)) for _ in range(s.num_inputs) ]
+    s.send = SendIfcRTL(mk_arb_msg(s.addr_nbits, s.nbits))
 
-    })
 
 # For to force testing a specific RTL language
 import sys
@@ -53,8 +52,8 @@ if hasattr( sys, '_called_from_test' ):
 # Import the appropriate version based on the rtl_language variable
 
 if rtl_language == 'pymtl':
-  from .PacketAssemblerPRTL import PacketAssemblerPRTL as PacketAssemblerRTL
+  from .ArbitratorPRTL import ArbitratorPRTL as ArbitratorRTL
 elif rtl_language == 'verilog':
-  PacketAssemblerRTL = PacketAssemblerVRTL
+  ArbitratorRTL = ArbitratorVRTL
 else:
   raise Exception("Invalid RTL language!")
