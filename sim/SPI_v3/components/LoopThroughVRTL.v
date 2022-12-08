@@ -1,5 +1,5 @@
 // ==========================================================================
-// LoopThroughVRTL.py
+// LoopThroughVRTL.v
 // ==========================================================================
 // This module is meant to either loopback data to the the upstream module, 
 // or pass data to the downstream module, depending on the select bit. 

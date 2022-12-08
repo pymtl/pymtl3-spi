@@ -1,5 +1,5 @@
 // ==========================================================================
-// Arbitrator.py
+// ArbitratorVRTL.v
 // ==========================================================================
 // This module is used to pick which component gets to output to the val/rdy SPI wrapper if multiple components can send a valid message.
 // The arbitrator puts an address header on the outgoing packet so that downstream components can tell which component sent the response

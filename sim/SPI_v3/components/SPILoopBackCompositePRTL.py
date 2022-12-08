@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-SPILoopBackComposite.py
+SPILoopBackCompositePRTL.py
 ==========================================================================
 A composition module consisting of SPIMinionAdapterComposite and Loopback modules.
 For use with testing SPI communication

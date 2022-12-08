@@ -1,6 +1,6 @@
 /*
 ==========================================================================
-PacketSerDesPRTL.py
+PacketSerDesVRTL.v
 ==========================================================================
 Generic packet serialized/deserializer. 
 Instantiates either a PacketAssembler or PacketDisassembler based on the 

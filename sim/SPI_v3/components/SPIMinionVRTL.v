@@ -1,7 +1,7 @@
 // ==========================================================================
-// SPIMinionPRTL.py
+// SPIMinionVRTL.v
 // ==========================================================================
-// SPIMinion module. Supports SPI mode 3
+// SPIMinion module. Supports SPI mode 0
 
 // Author : Yanghui Ou, Modified by Kyle Infantino
 

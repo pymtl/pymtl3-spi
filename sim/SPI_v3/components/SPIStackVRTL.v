@@ -1,5 +1,5 @@
 // ==========================================================================
-// SPIStackPRTL.py
+// SPIStackVRTL.v
 // ==========================================================================
 // A composition module combining the SPI Minion, SPI Minion Adapter, and Loopthrough
 // This is the standard SPI stack used in the efabless tapeout in 2022.

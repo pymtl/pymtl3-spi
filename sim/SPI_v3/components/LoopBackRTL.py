@@ -31,7 +31,6 @@ class LoopBackVRTL( VerilogPlaceholder, Component ):
   
     s.recv = RecvIfcRTL( mk_bits(s.nbits) )
     s.send = SendIfcRTL( mk_bits(s.nbits) )
-  
 
     s.set_metadata( VerilogTranslationPass.explicit_module_name, f'LoopBackRTL_{nbits}nbits' )
 

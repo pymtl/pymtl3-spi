@@ -7,7 +7,6 @@
 // Authors: Dilan Lakhani and Kyle Infantino
 // May 31, 2022
 
-
 `ifndef SPI_V3_COMPONENTS_LOOPBACK_V
 `define SPI_V3_COMPONENTS_LOOPBACK_V
 
