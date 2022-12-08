@@ -24,7 +24,6 @@ class SPILoopBackCompositePRTL( Component ):
     s.nbits = nbits  # size of SPI packet including 2 bit flow control
 
     #Interface
-
     s.spi_min = SPIMinionIfc()
     s.minion_parity = OutPort()
     s.adapter_parity = OutPort()

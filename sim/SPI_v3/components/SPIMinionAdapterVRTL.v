@@ -76,11 +76,11 @@ module SPI_v3_components_SPIMinionAdapterVRTL
   assign parity = (^send_msg) & send_val;
   
   always_comb begin : comb_block
-    open_entries = mc_q_num_free > 1;
+    open_entries  = mc_q_num_free > 1;
     mc_q_recv_val = push_msg_val_wrt & push_en;
-    pull_msg_spc = mc_q_recv_rdy & ( ( ~mc_q_recv_val ) | open_entries );
+    pull_msg_spc  = mc_q_recv_rdy & ( ( ~mc_q_recv_val ) | open_entries );
     cm_q_send_rdy = push_msg_val_rd & pull_en;
-    pull_msg_val = cm_q_send_rdy & cm_q_send_val;
+    pull_msg_val  = cm_q_send_rdy & cm_q_send_val;
     pull_msg_data = cm_q_send_msg & { (nbits-2){pull_msg_val} };
   end
 

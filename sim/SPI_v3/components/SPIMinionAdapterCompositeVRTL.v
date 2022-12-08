@@ -85,9 +85,9 @@ module SPI_v3_components_SPIMinionAdapterCompositeVRTL
   assign pull_msg[nbits-1]   =  pull_msg_val;
   assign pull_msg[nbits-2]   =  pull_msg_spc;
   assign pull_msg[nbits-3:0] =  pull_msg_data;
-  assign push_msg_val_wrt = push_msg[nbits-1];
-  assign push_msg_val_rd  = push_msg[nbits-2];
-  assign push_msg_data    = push_msg[nbits-3:0];
+  assign push_msg_val_wrt    = push_msg[nbits-1];
+  assign push_msg_val_rd     = push_msg[nbits-2];
+  assign push_msg_data       = push_msg[nbits-3:0];
 
 endmodule
 

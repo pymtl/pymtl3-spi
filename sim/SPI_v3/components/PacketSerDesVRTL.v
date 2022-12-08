@@ -33,11 +33,11 @@ module SPI_v3_components_PacketSerDesVRTL
   output logic [nbits_out-1:0] send_msg
 );
 
-    if (nbits_in > nbits_out) begin
-      SPI_v3_components_PacketDisassemblerVRTL #(nbits_in, nbits_out) disassem ( .* );
-    end else begin
-      SPI_v3_components_PacketAssemblerVRTL #(nbits_in, nbits_out) assem ( .* );
-    end
+  if (nbits_in > nbits_out) begin
+    SPI_v3_components_PacketDisassemblerVRTL #(nbits_in, nbits_out) disassem ( .* );
+  end else begin
+    SPI_v3_components_PacketAssemblerVRTL #(nbits_in, nbits_out) assem ( .* );
+  end
 
 endmodule
 

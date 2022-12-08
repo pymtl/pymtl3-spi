@@ -205,7 +205,7 @@ class SPITestHarness( object ):
     send_arr = []
     i = 0
     for i in range(num_bytes):
-        send_arr.append(pkt[i*8:(i+1)*8].uint())
+      send_arr.append(pkt[i*8:(i+1)*8].uint())
     send_arr.reverse()
     s.driver.sel()
     rec_msg = list(s.driver.writeread(send_arr))

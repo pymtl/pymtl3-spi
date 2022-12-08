@@ -13,21 +13,21 @@
 
 module SPI_v3_components_PacketAssemblerVRTL
 #(
-    parameter nbits_in = 8,
-    parameter nbits_out = 8,
-    //Do not set parameters below this line. They are calculated using above parameters
-    parameter num_regs = (nbits_out % nbits_in == 0) ? (nbits_out/nbits_in) : (nbits_out/nbits_in + 1)
+  parameter nbits_in = 8,
+  parameter nbits_out = 8,
+  //Do not set parameters below this line. They are calculated using above parameters
+  parameter num_regs = (nbits_out % nbits_in == 0) ? (nbits_out/nbits_in) : (nbits_out/nbits_in + 1)
 )(
-    input  logic                  clk,
-    input  logic                  reset,
-                                 
-    input  logic                  recv_val,
-    output logic                  recv_rdy,
-    input  logic [nbits_in-1:0]   recv_msg,
-                                 
-    output logic                  send_val,
-    input  logic                  send_rdy,
-    output logic [nbits_out-1:0]  send_msg
+  input  logic                  clk,
+  input  logic                  reset,
+                                
+  input  logic                  recv_val,
+  output logic                  recv_rdy,
+  input  logic [nbits_in-1:0]   recv_msg,
+                                
+  output logic                  send_val,
+  input  logic                  send_rdy,
+  output logic [nbits_out-1:0]  send_msg
 );
 
   logic [num_regs-1:0][nbits_in-1:0] regs;
@@ -56,26 +56,22 @@ module SPI_v3_components_PacketAssemblerVRTL
 
   genvar i;
   generate
-    for (i=0; i<num_regs; i++) begin
-
-      always_ff @(posedge clk) begin
-        if (reset) begin
-          regs[i] <= 0;
-        end
-        else if (counter == i) begin
-          regs[i] <= recv_msg;
-        end
-        else begin
-          regs[i] <= regs[i];
-        end
+  for (i=0; i<num_regs; i++) begin
+    always_ff @(posedge clk) begin
+      if (reset) begin
+        regs[i] <= 0;
+      end else if (counter == i) begin
+        regs[i] <= recv_msg;
+      end else begin
+        regs[i] <= regs[i];
       end
-
-      always_comb begin
-        // Need to put the first recv_msg into the upper bits of the output because we write the most-significant part of the packet first
-        temp_out[(nbits_in*(num_regs-1-i) + nbits_in - 1) : (nbits_in*(num_regs-1-i))] = regs[i];
-      end
-
     end
+
+    always_comb begin
+      // Need to put the first recv_msg into the upper bits of the output because we write the most-significant part of the packet first
+      temp_out[(nbits_in*(num_regs-1-i) + nbits_in - 1) : (nbits_in*(num_regs-1-i))] = regs[i];
+    end
+  end
   endgenerate
 
 endmodule

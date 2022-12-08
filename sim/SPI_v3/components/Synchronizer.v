@@ -13,7 +13,7 @@ Synchronizer.v
 
 module SPI_v3_components_Synchronizer 
 #(
-    parameter reset_value = 1'b0
+  parameter reset_value = 1'b0
 )(
   input  logic clk ,
   input  logic in_,

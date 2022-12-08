@@ -23,15 +23,12 @@ module SPI_v3_components_ShiftReg
   input  logic             shift_en 
 );
   
-  always_ff @(posedge clk) 
-  begin 
+  always_ff @(posedge clk) begin 
     if ( reset ) begin
       out <= { nbits{reset_value}};
-    end
-    else if ( load_en ) begin
+    end else if ( load_en ) begin
       out <= load_data;
-    end
-    else if ( ( ~load_en ) & shift_en ) begin
+    end else if ( ( ~load_en ) & shift_en ) begin
       out <= { out[nbits-2:0], in_ };
     end
   end

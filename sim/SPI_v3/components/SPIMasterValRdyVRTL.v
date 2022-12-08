@@ -82,7 +82,7 @@ module SPI_v3_components_SPIMasterValRdyVRTL
   logic shreg_out_rst;
 
   typedef enum logic [2:0] {STATE_INIT, STATE_START0, STATE_START1, STATE_SCLK_HIGH, 
-        STATE_SCLK_LOW, STATE_CS_LOW_WAIT, STATE_DONE} state_t;
+                            STATE_SCLK_LOW, STATE_CS_LOW_WAIT, STATE_DONE} state_t;
 
   state_t state, next_state;
 

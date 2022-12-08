@@ -63,11 +63,11 @@ class SPIStackVRTL( VerilogPlaceholder, Component ):
     })
   
   def line_trace( s ):
-        return f"send {s.send.val}|{s.send.rdy}|{s.send.msg}\
-                 recv {s.recv.val}|{s.recv.rdy}|{s.recv.msg}\
-                 lt_sel|{s.loopthrough_sel}\
-                 mp|{s.minion_parity}\
-                 ap|{s.adapter_parity}"
+    return f"send {s.send.val}|{s.send.rdy}|{s.send.msg}\
+              recv {s.recv.val}|{s.recv.rdy}|{s.recv.msg}\
+              lt_sel|{s.loopthrough_sel}\
+              mp|{s.minion_parity}\
+              ap|{s.adapter_parity}"
 
 # For to force testing a specific RTL language
 import sys

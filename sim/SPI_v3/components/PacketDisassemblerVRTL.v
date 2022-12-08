@@ -61,11 +61,9 @@ module SPI_v3_components_PacketDisassemblerVRTL
   always_ff @(posedge clk) begin
     if (reset | ((counter == (num_regs-1)) & send_rdy)) begin // if reset or you have sent the last packet
       counter <= 0;
-    end
-    else if (send_val & send_rdy) begin // if we send a packet
+    end else if (send_val & send_rdy) begin // if we send a packet
       counter <= counter + 1;
-    end
-    else begin
+    end else begin
       counter <= counter;
     end
   end
@@ -74,41 +72,39 @@ module SPI_v3_components_PacketDisassemblerVRTL
   always_ff @(posedge clk) begin
     if (reset) begin
       transaction_val <= 0;
-    end
-    else if ((recv_val & recv_rdy) | ((counter == (num_regs-1)) & send_rdy)) begin // if there is an input packet or you have sent the last output packet
+    end else if ((recv_val & recv_rdy) | ((counter == (num_regs-1)) & send_rdy)) begin // if there is an input packet or you have sent the last output packet
       transaction_val <= recv_val & recv_rdy; // set transaction val to 1 if it is an input packet
-    end
-    else begin
+    end else begin
       transaction_val <= transaction_val;
     end
   end
   
   genvar i;
   generate 
-    for (i=0; i < num_regs; i++) begin
+  for (i=0; i < num_regs; i++) begin
 
-      // Sequential Reg Update Logic
-      if (i == (num_regs - 1)) begin // this is the top register
-        localparam zext_len = 0 ? (nbits_in%nbits_out == 0) : (nbits_out - (nbits_in - (nbits_out*num_regs-nbits_out) )); // value to zero extend to result in an nbits_out long vector;
-        always_ff @(posedge clk) begin
-          if (recv_val & recv_rdy) begin
-            regs[i] <= { {zext_len{1'b0}} , recv_msg[ nbits_in-1 : (nbits_out*num_regs-nbits_out) ] }; // holds MSb, zext to fit register size 
-          end
+    // Sequential Reg Update Logic
+    if (i == (num_regs - 1)) begin // this is the top register
+      localparam zext_len = 0 ? (nbits_in%nbits_out == 0) : (nbits_out - (nbits_in - (nbits_out*num_regs-nbits_out) )); // value to zero extend to result in an nbits_out long vector;
+      always_ff @(posedge clk) begin
+        if (recv_val & recv_rdy) begin
+          regs[i] <= { {zext_len{1'b0}} , recv_msg[ nbits_in-1 : (nbits_out*num_regs-nbits_out) ] }; // holds MSb, zext to fit register size 
+        end
+      end
+    end 
+    else begin // not top register
+      always_ff @(posedge clk) begin
+        if (recv_val & recv_rdy) begin
+          regs[i] <= recv_msg[ (nbits_out*i + nbits_out -1) : (nbits_out*(i)) ];
         end
       end 
-      else begin // not top register
-        always_ff @(posedge clk) begin
-          if (recv_val & recv_rdy) begin
-            regs[i] <= recv_msg[ (nbits_out*i + nbits_out -1) : (nbits_out*(i)) ];
-          end
-        end 
-      end
-
-      // Mux and Output Logic
-      always_comb begin
-        reg_mux_in_[i] = regs[i];
-      end
     end
+
+    // Mux and Output Logic
+    always_comb begin
+      reg_mux_in_[i] = regs[i];
+    end
+  end
   endgenerate
 
 endmodule

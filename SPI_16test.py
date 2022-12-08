@@ -1,3 +1,5 @@
+#sample program for testing SPI Driver
+
 from spidriver import SPIDriver
 port = '/dev/tty.usbserial-DO02C6P1'
 s = SPIDriver(port)
