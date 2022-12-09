@@ -79,7 +79,7 @@ module SPI_v3_components_SPIMasterValRdyVRTL
 
   logic sclk_negedge;
   logic sclk_posedge;
-  logic shreg_out_rst;
+  logic shreg_in_rst;
 
   typedef enum logic [2:0] {STATE_INIT, STATE_START0, STATE_START1, STATE_SCLK_HIGH, 
                             STATE_SCLK_LOW, STATE_CS_LOW_WAIT, STATE_DONE} state_t;
@@ -123,7 +123,7 @@ module SPI_v3_components_SPIMasterValRdyVRTL
     sclk_negedge = 0;
     sclk_posedge = 0;
     sclk_counter_en = 0;
-    shreg_out_rst = 0;
+    shreg_in_rst = 0;
 
     if (state == STATE_INIT) begin
       recv_rdy           = 1;
@@ -131,7 +131,7 @@ module SPI_v3_components_SPIMasterValRdyVRTL
       cs_addr_reg_en     = cs_addr_ifc_val;
     end else if (state == STATE_START0) begin
       spi_ifc_cs[cs_addr_reg_out] = 0;
-      shreg_out_rst       = 1;
+      shreg_in_rst       = 1;
     end else if (state == STATE_START1) begin
       sclk_posedge        = 1;
       spi_ifc_cs[cs_addr_reg_out] = 0;
@@ -168,7 +168,7 @@ module SPI_v3_components_SPIMasterValRdyVRTL
     .load_data(0),
     .load_en(0),
     .out(shreg_in_out),
-    .reset(shreg_out_rst),
+    .reset(shreg_in_rst),
     .shift_en(sclk_posedge) 
   );
 

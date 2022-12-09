@@ -48,7 +48,7 @@ class SPIMasterValRdyPRTL( Component ):
 
     s.sclk_negedge = Wire()
     s.sclk_posedge = Wire()
-    s.shreg_out_rst = Wire()
+    s.shreg_in_rst = Wire()
 
     # Components & Logic
     s.STATE_INIT        = 0
@@ -112,7 +112,7 @@ class SPIMasterValRdyPRTL( Component ):
       s.sclk_negedge        @= 0
       s.sclk_posedge        @= 0
       s.sclk_counter_en     @= 0
-      s.shreg_out_rst       @= 0
+      s.shreg_in_rst       @= 0
       
       #-------------------------------------------------------------------
       # STATE: INIT
@@ -126,7 +126,7 @@ class SPIMasterValRdyPRTL( Component ):
       #-------------------------------------------------------------------    
       elif s.state == s.STATE_START0: #start
         s.spi_ifc.cs[s.cs_addr_reg.out] @= 0
-        s.shreg_out_rst                 @= 1
+        s.shreg_in_rst                 @= 1
       #-------------------------------------------------------------------
       # STATE: START1
       #------------------------------------------------------------------- 
@@ -176,7 +176,7 @@ class SPIMasterValRdyPRTL( Component ):
     m.shift_en  //= s.sclk_posedge 
     m.load_en   //= 0
     m.load_data //= 0
-    m.ext_reset //= s.shreg_out_rst
+    m.ext_reset //= s.shreg_in_rst
 
     s.shreg_out = m = ShiftReg( s.nbits )
     m.in_       //= 0
