@@ -16,6 +16,9 @@ def pytest_addoption(parser):
 
   parser.addoption( "--vrtl", action="store_true",
                     help="use VRTL implementations" )
+  
+  parser.addoption( "--physical", action="store_true",
+                    help="Use tests on a physical chip" )
 
 #-------------------------------------------------------------------------
 # Handle other command line options
@@ -25,6 +28,7 @@ def pytest_configure(config):
   import sys
   sys._called_from_test   = True
   sys._pymtl_rtl_override = False
+  sys._is_physical        = config.option.physical
   if config.option.prtl:
     sys._pymtl_rtl_override = 'pymtl'
   elif config.option.vrtl:
@@ -34,6 +38,7 @@ def pytest_unconfigure(config):
   import sys
   del sys._called_from_test
   del sys._pymtl_rtl_override
+  del sys._is_physical
 
 #-------------------------------------------------------------------------
 # fix_randseed

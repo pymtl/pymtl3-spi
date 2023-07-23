@@ -12,7 +12,7 @@ from pymtl3 import *
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
 
 from math import ceil
-import copy
+import copy, sys
 from spidriver import SPIDriver
 
 #=========================================================================
@@ -34,7 +34,7 @@ class SPITestHarness( object ):
   def __init__( s, DESIGN, num_components, spi_bits, cmdline_opts, trace=True ):
  
     s.dut = DESIGN
-    s.is_phy_test = False  # Change this switch to True if you want to use the Physical Test Harness and the SPIDriver
+    s.is_phy_test = sys._is_physical  # Use the --physical flag in pytest if you want to use the Physical Test Harness and the SPIDriver
     s.dut = config_model_with_cmdline_opts( s.dut, cmdline_opts, [] )
     s.dut.apply(DefaultPassGroup(linetrace=True)) #commented out for chip-sim
     # from pymtl3.passes.mamba import Mamba2020
